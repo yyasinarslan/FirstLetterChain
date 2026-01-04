@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zincirleme Kelime Oyunu</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>🔗 Kelime Zinciri</h1>
+            <p>Bir önceki kelimeyle uyumlu olanı bul!</p>
+        </header>
+
+        <!-- BÖLÜM 0: MENÜ -->
+        <div id="menu-screen" class="card">
+            <h2>Oyun Modu Seç</h2>
+            <button id="btn-pvc" class="primary-btn" style="margin-bottom: 10px;">🤖 Bilgisayara Karşı</button>
+            <button id="btn-pvp" class="action-btn">👥 İki Kişilik (PvP)</button>
+        </div>
+
+        <!-- BÖLÜM 1: OYUN KURULUMU (Sadece PvP için) -->
+        <div id="setup-screen" class="card hidden">
+            <h2 id="setup-title">Oyun Kurulumu</h2>
+            <p id="setup-desc" class="info-text">Zinciri oluşturacak 7 kelimeyi giriniz.</p>
+            <div id="setup-inputs" class="input-grid">
+                <!-- JavaScript ile buraya 7 input kutusu gelecek -->
+            </div>
+            <button id="setup-action-btn" class="primary-btn">Devam Et</button>
+        </div>
+
+        <!-- BÖLÜM 2: OYUN ALANI (Oyuncu Ekranı) -->
+        <div id="game-screen" class="card hidden">
+            <!-- Oyuncu Skor ve Sıra Alanı -->
+            <div class="players-container">
+                <div id="p1-card" class="player-card active">
+                    <span class="p-name">1. Oyuncu</span>
+                    <span id="p1-score" class="p-score">0</span>
+                </div>
+                <div id="p2-card" class="player-card hidden">
+                    <span class="p-name">2. Oyuncu</span>
+                    <span id="p2-score" class="p-score">0</span>
+                </div>
+            </div>
+
+            <h3 id="turn-indicator" style="text-align:center; margin-top:0; color: #4f46e5;">Sıra Sende</h3>
+
+            <div id="word-chain" class="chain-container">
+                <!-- Kelimeler buraya listelenecek -->
+            </div>
+
+            <div class="interaction-area">
+                <input type="text" id="guess-input" placeholder="Sıradaki kelimeyi tahmin et..." autocomplete="off">
+                <button id="guess-btn" class="action-btn">Tahmin Et</button>
+            </div>
+            <p id="message" class="message"></p>
+            
+            <button id="restart-btn" class="secondary-btn hidden">Yeni Oyun Kur</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
