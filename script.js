@@ -726,7 +726,8 @@ function finishGame(customMessage = null) {
         resultText = `Tebrikler! Zinciri tamamladın. Puanın: ${scores[1]} 🏆`;
     } else {
         // PvP Bitiş
-        const winner = scores[1] > scores[2] ? p1Name : (scores[2] > scores[1] ? p2Name : "Dostluk");
+        // İlk bitiren kazanır (Puanı düşük olsa bile)
+        const winner = progress[1] >= totalWords ? p1Name : p2Name;
         resultText = `Oyun Bitti! Kazanan: ${winner} 🏆`;
     }
     
