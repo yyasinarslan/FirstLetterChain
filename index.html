@@ -40,6 +40,20 @@
                     <label style="font-size: 0.9rem;">Süre (Saniye): </label>
                     <input type="number" id="timer-duration" value="30" min="5" max="300" style="width: 60px; padding: 5px; border: 1px solid #e5e7eb; border-radius: 4px;">
                 </div>
+                
+                <div style="margin-top: 15px; border-top: 1px solid #e5e7eb; padding-top: 15px;">
+                    <h3 style="font-size: 1rem; margin: 0 0 10px 0; color: #4b5563;">Puanlama Kuralları</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <label style="font-size: 0.9rem;">Doğru Tahmin (+):</label>
+                        <input type="number" id="score-correct-input" value="10" min="1" style="width: 100%; padding: 5px; border: 1px solid #e5e7eb; border-radius: 4px;">
+                        
+                        <label style="font-size: 0.9rem;">Yanlış Cezası (-):</label>
+                        <input type="number" id="score-wrong-input" value="3" min="0" style="width: 100%; padding: 5px; border: 1px solid #e5e7eb; border-radius: 4px;">
+
+                        <label style="font-size: 0.9rem;">Süre Cezası (-):</label>
+                        <input type="number" id="score-timeout-input" value="5" min="0" style="width: 100%; padding: 5px; border: 1px solid #e5e7eb; border-radius: 4px;">
+                    </div>
+                </div>
             </div>
             <button id="btn-settings-back" class="primary-btn">Kaydet ve Geri Dön</button>
         </div>

@@ -30,6 +30,9 @@ const timerToggle = document.getElementById('timer-toggle');
 const timerDurationInput = document.getElementById('timer-duration');
 const timerSettingsDetail = document.getElementById('timer-settings-detail');
 const timerBox = document.getElementById('timer-box');
+const scoreCorrectInput = document.getElementById('score-correct-input');
+const scoreWrongInput = document.getElementById('score-wrong-input');
+const scoreTimeoutInput = document.getElementById('score-timeout-input');
 
 // --- Oyun Durumu (State) ---
 let gameMode = 'pvc'; // 'pvc' (Player vs Computer) veya 'pvp' (Player vs Player)
@@ -48,6 +51,9 @@ let isTimerEnabled = false;
 let timerDuration = 30;
 let currentTime = 0;
 let timerInterval = null;
+let scoreCorrect = 10;
+let scoreWrong = 3;
+let scoreTimeout = 5;
 const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
@@ -102,6 +108,9 @@ function initGame(mode) {
     isHintEnabled = hintToggle.checked; // Ayarı oku
     isTimerEnabled = timerToggle.checked;
     timerDuration = parseInt(timerDurationInput.value) || 30;
+    scoreCorrect = parseInt(scoreCorrectInput.value) || 10;
+    scoreWrong = parseInt(scoreWrongInput.value) || 3;
+    scoreTimeout = parseInt(scoreTimeoutInput.value) || 5;
 
     if (mode === 'pvc') {
         // Bilgisayar Modu: Rastgele liste seç ve başlat
@@ -282,7 +291,7 @@ function handleGuess() {
     // Karşılaştırma
     if (userGuess.toLocaleLowerCase('tr-TR') === correctWord.toLocaleLowerCase('tr-TR')) {
         // DOĞRU
-        scores[currentPlayer] += 10;
+        scores[currentPlayer] += scoreCorrect;
         messageEl.innerText = "Doğru!";
         messageEl.className = "message success";
         
@@ -311,8 +320,8 @@ function handleGuess() {
         startTimer(); // Yeni kelime için süreyi sıfırla
     } else {
         // YANLIŞ
-        scores[currentPlayer] -= 3;
-        messageEl.innerText = "Yanlış! (-3 Puan)";
+        scores[currentPlayer] -= scoreWrong;
+        messageEl.innerText = `Yanlış! (-${scoreWrong} Puan)`;
         messageEl.className = "message error";
         guessInput.classList.add('shake');
         setTimeout(() => guessInput.classList.remove('shake'), 500);
@@ -321,15 +330,15 @@ function handleGuess() {
         
         if (gameMode === 'pvp') {
             if (isHintEnabled) {
-                messageEl.innerText = "Yanlış! -3 Puan. Sıra geçti. (Sonraki turda ipucu)";
+                messageEl.innerText = `Yanlış! -${scoreWrong} Puan. Sıra geçti. (Sonraki turda ipucu)`;
                 revealedCounts[currentPlayer]++; // Bilemediği için bir harf daha açılacak
             } else {
-                messageEl.innerText = "Yanlış! -3 Puan. Sıra diğer oyuncuya geçiyor.";
+                messageEl.innerText = `Yanlış! -${scoreWrong} Puan. Sıra diğer oyuncuya geçiyor.`;
             }
             switchTurn();
         } else {
             if (isHintEnabled) {
-                messageEl.innerText = "Yanlış! -3 Puan. İpucu açıldı (+1 harf).";
+                messageEl.innerText = `Yanlış! -${scoreWrong} Puan. İpucu açıldı (+1 harf).`;
                 revealedCounts[currentPlayer]++;
                 renderBoard();
             }
@@ -426,7 +435,7 @@ function handleTimeOut() {
     stopTimer();
     
     // Puan cezası ve kelimeyi geçme
-    scores[currentPlayer] -= 5; 
+    scores[currentPlayer] -= scoreTimeout; 
     progress[currentPlayer]++;
     revealedCounts[currentPlayer] = 1;
 
@@ -437,14 +446,14 @@ function handleTimeOut() {
     }
 
     if (gameMode === 'pvc') {
-        messageEl.innerText = "Süre doldu! -5 Puan. Kelime açıldı.";
+        messageEl.innerText = `Süre doldu! -${scoreTimeout} Puan. Kelime açıldı.`;
         messageEl.className = "message error";
         guessInput.value = '';
         updatePlayerUI();
         renderBoard();
         startTimer();
     } else {
-        messageEl.innerText = "Süre doldu! -5 Puan. Kelime açıldı, sıra geçti.";
+        messageEl.innerText = `Süre doldu! -${scoreTimeout} Puan. Kelime açıldı, sıra geçti.`;
         messageEl.className = "message error";
         guessInput.value = '';
         switchTurn();
