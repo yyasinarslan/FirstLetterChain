@@ -18,8 +18,22 @@
         <!-- BÖLÜM 0: MENÜ -->
         <div id="menu-screen" class="card">
             <h2>Oyun Modu Seç</h2>
+            
             <button id="btn-pvc" class="primary-btn" style="margin-bottom: 10px;">🤖 Bilgisayara Karşı</button>
             <button id="btn-pvp" class="action-btn">👥 İki Kişilik (PvP)</button>
+            <button id="btn-settings" class="secondary-btn">⚙️ Ayarlar</button>
+        </div>
+
+        <!-- BÖLÜM 0.5: AYARLAR EKRANI -->
+        <div id="settings-screen" class="card hidden">
+            <h2>Ayarlar</h2>
+            <div style="margin-bottom: 20px; text-align: left; background: #f9fafb; padding: 15px; border-radius: 8px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem;">
+                    <input type="checkbox" id="hint-toggle" checked>
+                    <span>Yanlış tahminde ipucu açılsın (+1 harf)</span>
+                </label>
+            </div>
+            <button id="btn-settings-back" class="primary-btn">Kaydet ve Geri Dön</button>
         </div>
 
         <!-- BÖLÜM 1: OYUN KURULUMU (Sadece PvP için) -->

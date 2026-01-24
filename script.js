@@ -4,6 +4,7 @@
 
 // --- DOM Elementleri ---
 const menuScreen = document.getElementById('menu-screen');
+const settingsScreen = document.getElementById('settings-screen');
 const setupScreen = document.getElementById('setup-screen');
 const gameScreen = document.getElementById('game-screen');
 const setupInputsContainer = document.getElementById('setup-inputs');
@@ -22,6 +23,9 @@ const p2ScoreEl = document.getElementById('p2-score');
 const turnIndicator = document.getElementById('turn-indicator');
 const btnPvC = document.getElementById('btn-pvc');
 const btnPvP = document.getElementById('btn-pvp');
+const hintToggle = document.getElementById('hint-toggle');
+const btnSettings = document.getElementById('btn-settings');
+const btnSettingsBack = document.getElementById('btn-settings-back');
 
 // --- Oyun Durumu (State) ---
 let gameMode = 'pvc'; // 'pvc' (Player vs Computer) veya 'pvp' (Player vs Player)
@@ -31,18 +35,25 @@ let computerChain = []; // Bilgisayar modu için
 
 // İlerleme Durumları (Hangi kelimedeler)
 let progress = { 1: 1, 2: 1 }; 
+let revealedCounts = { 1: 1, 2: 1 }; // Her oyuncu için o anki kelimede kaç harf açık
 let currentPlayer = 1; // 1 veya 2
 let scores = { 1: 0, 2: 0 };
 let setupStep = 1; // PvP kurulum aşaması (1: P1 giriyor, 2: P2 giriyor)
+let isHintEnabled = true; // Ayar: Yanlış tahminde ipucu verilsin mi?
 const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 const computerLists = [
     ["Telefon", "Şarjı", "Aleti", "Çantası", "Askısı", "İpi", "Kopuk"],
-    ["Futbol", "Topu", "Ağları", "Delik", "Deşik", "Olmuş", "Yazık"],
     ["Kahve", "Fincanı", "Tabağı", "Kenarı", "Kırık", "Cam", "Parçası"],
     ["Okul", "Çantası", "Fermuarı", "Bozuk", "Para", "Üstü", "Kalsın"],
-    ["Yazılım", "Dili", "Yapısı", "Karmaşık", "Sayılar", "Teorisi", "Kitabı"]
+    ["Yazılım", "Dili", "Yapısı", "Karmaşık", "Sayılar", "Teorisi", "Kitabı"],
+    ["Yağmur", "Damlası", "Çikolata", "Şelalesi", "Suyu", "Şişesi", "Buruşması"],
+    ["Yaz", "Tatili", "Köyü", "Kahvesi", "Falı", "Bakmak", "Görmek"],
+    ["Hamburger", "Ekmeği", "Parası", "Kasası", "Şifresi", "Kırmak", "Dökmek"],
+    ["Deniz", "Sörfü", "Tahtası", "Kurusu", "Fasulye", "Fiyatı", "Etiketi"],
+    ["Kalp", "Krizi", "Masası", "Ayağı", "Parmağı", "Çıtlaması", "Kırıldı"],
+    ["Uğur", "Böceği", "İlacı", "Kutusu", "Oyunu", "Konsolu", "Aynası"]
 ];
 
 // --- Başlangıç ---
@@ -54,6 +65,16 @@ function init() {
 
     btnPvC.addEventListener('click', () => initGame('pvc'));
     btnPvP.addEventListener('click', () => initGame('pvp'));
+
+    // Ayarlar Menüsü Geçişleri
+    btnSettings.addEventListener('click', () => {
+        menuScreen.classList.add('hidden');
+        settingsScreen.classList.remove('hidden');
+    });
+    btnSettingsBack.addEventListener('click', () => {
+        settingsScreen.classList.add('hidden');
+        menuScreen.classList.remove('hidden');
+    });
     
     setupActionBtn.addEventListener('click', handleSetupAction);
     guessBtn.addEventListener('click', handleGuess);
@@ -64,6 +85,7 @@ function init() {
 function initGame(mode) {
     gameMode = mode;
     menuScreen.classList.add('hidden');
+    isHintEnabled = hintToggle.checked; // Ayarı oku
 
     if (mode === 'pvc') {
         // Bilgisayar Modu: Rastgele liste seç ve başlat
@@ -141,6 +163,7 @@ function startGameplay() {
     
     // Sıfırlama
     progress = { 1: 1, 2: 1 };
+    revealedCounts = { 1: 1, 2: 1 };
     currentPlayer = 1;
     scores = { 1: 0, 2: 0 };
     
@@ -202,13 +225,19 @@ function renderBoard() {
             textSpan.innerText = word;
         } else {
             // Henüz bilinmemiş (Maskeli)
-            const firstLetter = word.charAt(0);
-            const mask = "_".repeat(word.length - 1);
-            textSpan.innerText = `${firstLetter}${mask}`;
+            let showCount = 1;
             
             if (index === currentProg) {
                 itemDiv.classList.add('active');
+                // Sıra kimdeyse onun ipucu seviyesini kullan
+                showCount = revealedCounts[currentPlayer];
             }
+            
+            // Kelime uzunluğunu aşmaması için kontrol
+            if (showCount > word.length) showCount = word.length;
+            const visiblePart = word.substring(0, showCount);
+            const mask = "_".repeat(word.length - showCount);
+            textSpan.innerText = `${visiblePart}${mask}`;
         }
 
         itemDiv.appendChild(indexSpan);
@@ -241,6 +270,7 @@ function handleGuess() {
         
         // İlerlemeyi artır
         progress[currentPlayer]++;
+        revealedCounts[currentPlayer] = 1; // Yeni kelimeye geçince ipucunu sıfırla
         
         // Oyun Bitti mi?
         if (progress[currentPlayer] >= TOTAL_WORDS) {
@@ -270,8 +300,19 @@ function handleGuess() {
         guessInput.value = '';
         
         if (gameMode === 'pvp') {
-            messageEl.innerText = "Yanlış! Sıra diğer oyuncuya geçiyor.";
+            if (isHintEnabled) {
+                messageEl.innerText = "Yanlış! Sıra geçti. (Bir sonraki turda +1 harf ipucu)";
+                revealedCounts[currentPlayer]++; // Bilemediği için bir harf daha açılacak
+            } else {
+                messageEl.innerText = "Yanlış! Sıra diğer oyuncuya geçiyor.";
+            }
             switchTurn();
+        } else {
+            if (isHintEnabled) {
+                messageEl.innerText = "Yanlış! İpucu açıldı (+1 harf).";
+                revealedCounts[currentPlayer]++;
+                renderBoard();
+            }
         }
     }
     updatePlayerUI();
