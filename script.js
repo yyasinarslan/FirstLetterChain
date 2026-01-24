@@ -11,6 +11,7 @@ const setupInputsContainer = document.getElementById('setup-inputs');
 const setupTitle = document.getElementById('setup-title');
 const setupDesc = document.getElementById('setup-desc');
 const setupActionBtn = document.getElementById('setup-action-btn');
+const setupRandomBtn = document.getElementById('setup-random-btn');
 const wordChainContainer = document.getElementById('word-chain');
 const guessInput = document.getElementById('guess-input');
 const guessBtn = document.getElementById('guess-btn');
@@ -99,6 +100,7 @@ function init() {
     });
     
     setupActionBtn.addEventListener('click', handleSetupAction);
+    setupRandomBtn.addEventListener('click', fillRandomSetup);
     guessBtn.addEventListener('click', handleGuess);
     restartBtn.addEventListener('click', resetGame);
 }
@@ -170,6 +172,27 @@ function updateSetupUI() {
         setupActionBtn.innerText = "Oyunu Başlat";
         setupTitle.style.color = "#ef4444"; // Farklı renk
     }
+}
+
+function fillRandomSetup() {
+    // Seçilen kelime sayısına uygun listeleri bul
+    const validLists = computerLists.filter(list => list.length >= totalWords);
+    
+    if (validLists.length === 0) {
+        alert(`Bu uzunlukta (${totalWords}) uygun liste bulunamadı.`);
+        return;
+    }
+
+    // Rastgele birini seç
+    const randomList = validLists[Math.floor(Math.random() * validLists.length)];
+    const inputs = document.querySelectorAll('.setup-input');
+
+    // Inputları doldur
+    inputs.forEach((input, index) => {
+        if (randomList[index]) {
+            input.value = randomList[index];
+        }
+    });
 }
 
 function handleSetupAction() {
