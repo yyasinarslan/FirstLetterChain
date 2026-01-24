@@ -600,7 +600,7 @@ function handleGuess(isRemote = false) {
         
         guessInput.value = '';
         
-        if (gameMode === 'pvp') {
+        if (gameMode === 'pvp' || gameMode === 'online') {
             if (isHintEnabled) {
                 messageEl.innerText = `Yanlış! -${scoreWrong} Puan. Sıra geçti. (Sonraki turda ipucu)`;
                 revealedCounts[currentPlayer]++; // Bilemediği için bir harf daha açılacak
@@ -644,7 +644,16 @@ function handlePass(isRemote = false) {
         startTimer();
     } else {
         // PvP: Sırayı devret
-        messageEl.innerText = "Pas geçildi. Sıra diğer oyuncuda.";
+        let msg = "Pas geçildi. Sıra diğer oyuncuda.";
+        if (gameMode === 'online') {
+            if (isRemote) {
+                msg = "Rakip pas geçti. Sıra sende!";
+            } else {
+                msg = "Pas geçildi. Sıra rakipte.";
+            }
+        }
+        
+        messageEl.innerText = msg;
         messageEl.className = "message";
         guessInput.value = '';
         switchTurn();
