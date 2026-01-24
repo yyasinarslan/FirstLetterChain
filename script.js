@@ -253,14 +253,28 @@ function initOnlineLobby() {
 }
 
 function createRoom() {
-    document.getElementById('lobby-actions').innerHTML = `
+    const lobbyActions = document.getElementById('lobby-actions');
+    lobbyActions.innerHTML = `
         <div style="text-align:center;">
             <p>Oda Kodunuz:</p>
-            <h1 style="font-size: 1.2rem; letter-spacing: 1px; color: var(--primary); margin: 10px 0; word-break: break-all;">${peer.id}</h1>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0;">
+                <h1 style="font-size: 1.2rem; letter-spacing: 1px; color: var(--primary); margin: 0; word-break: break-all;">${peer.id}</h1>
+                <button id="btn-copy-code" class="secondary-btn" style="width: auto; padding: 5px 10px; margin: 0; cursor: pointer;" title="Kopyala">📋</button>
+            </div>
+            <p id="copy-feedback" style="height: 20px; margin: 0; font-size: 0.9rem; color: var(--success); font-weight: bold;"></p>
             <p class="info-text">Arkadaşınla bu kodu paylaş ve bekle...</p>
             <div class="loader" style="margin: 20px auto;"></div>
         </div>
     `;
+
+    document.getElementById('btn-copy-code').addEventListener('click', () => {
+        navigator.clipboard.writeText(peer.id).then(() => {
+            const feedback = document.getElementById('copy-feedback');
+            feedback.innerText = "Kopyalandı!";
+            setTimeout(() => feedback.innerText = "", 2000);
+        });
+    });
+
     myPlayerId = 1; // Host her zaman P1
 }
 
