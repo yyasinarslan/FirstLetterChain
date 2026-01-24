@@ -650,17 +650,27 @@ function handlePass(isRemote = false) {
         startTimer();
     } else {
         // PvP: Sırayı devret
-        let msg = "Pas geçildi. Sıra diğer oyuncuda.";
+        // Pas geçildiğinde puan düş, kelimeyi atla ve sırayı devret
+        scores[currentPlayer] -= scorePass;
+        progress[currentPlayer]++;
+        revealedCounts[currentPlayer] = 1;
+
+        if (progress[currentPlayer] >= totalWords) {
+            finishGame();
+            return;
+        }
+
+        let msg = `Pas geçildi (-${scorePass} Puan). Sıra diğer oyuncuda.`;
         if (gameMode === 'online') {
             if (isRemote) {
-                msg = "Rakip pas geçti. Sıra sende!";
+                msg = `Rakip pas geçti (-${scorePass} Puan). Sıra sende!`;
             } else {
-                msg = "Pas geçildi. Sıra rakipte.";
+                msg = `Pas geçildi (-${scorePass} Puan). Sıra rakipte.`;
             }
         }
         
         messageEl.innerText = msg;
-        messageEl.className = "message";
+        messageEl.className = "message error";
         guessInput.value = '';
         switchTurn();
     }
