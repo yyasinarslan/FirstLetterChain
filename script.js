@@ -140,8 +140,8 @@ function init() {
     if(nameSubmitBtn) nameSubmitBtn.addEventListener('click', handleNameSubmit);
     if(btnCreateRoom) btnCreateRoom.addEventListener('click', createRoom);
     if(btnJoinRoom) btnJoinRoom.addEventListener('click', joinRoom);
-    if(guessBtn) guessBtn.addEventListener('click', handleGuess);
-    if(passBtn) passBtn.addEventListener('click', handlePass);
+    if(guessBtn) guessBtn.addEventListener('click', () => handleGuess(false));
+    if(passBtn) passBtn.addEventListener('click', () => handlePass(false));
     if(restartBtn) restartBtn.addEventListener('click', resetGame);
 }
 
