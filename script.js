@@ -100,7 +100,7 @@ const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
-const GAME_VERSION = "v4.0";
+const GAME_VERSION = "v4.1";
 function init() {
     console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
@@ -489,11 +489,31 @@ function updateSetupUI() {
 
 function fillRandomSetup() {
     // Seçilen kelime sayısına uygun listeleri bul
-    const validLists = computerLists.filter(list => list.length >= totalWords);
+    let validLists = computerLists.filter(list => list.length >= totalWords);
     
     if (validLists.length === 0) {
         alert(`Bu uzunlukta (${totalWords}) uygun liste bulunamadı.`);
         return;
+    }
+
+    // Çakışma Önleme (PvP ve Online)
+    let chainToAvoid = null;
+
+    if (gameMode === 'pvp' && setupStep === 2) {
+        chainToAvoid = p1Chain;
+    } else if (gameMode === 'online') {
+        // Eğer karşı tarafın zinciri geldiyse, onu engelle
+        if (myPlayerId === 1 && p2Chain.length > 0) chainToAvoid = p2Chain;
+        else if (myPlayerId === 2 && p1Chain.length > 0) chainToAvoid = p1Chain;
+    }
+
+    if (chainToAvoid && chainToAvoid.length > 0) {
+        validLists = validLists.filter(list => {
+            const listSegment = list.slice(0, totalWords);
+            return JSON.stringify(listSegment) !== JSON.stringify(chainToAvoid);
+        });
+        // Eğer hiç liste kalmadıysa (çok az seçenek varsa), filtreyi yoksay
+        if (validLists.length === 0) validLists = computerLists.filter(list => list.length >= totalWords);
     }
 
     // Rastgele birini seç
