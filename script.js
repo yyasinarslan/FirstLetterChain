@@ -296,6 +296,9 @@ function handleRemoteData(data) {
         
     } else if (data.type === 'SETUP_INIT') {
         // Guest: Kurulum emri aldı
+        // İsim Düzeltmesi: Şu an p1Name'de kendi ismimiz var.
+        // Bunu p2Name'e alalım, çünkü p1Name Host olacak.
+        p2Name = p1Name;
         p1Name = data.p1Name;
         startOnlineSetup();
 
@@ -309,6 +312,9 @@ function handleRemoteData(data) {
     } else if (data.type === 'GUESS') {
         guessInput.value = data.value;
         handleGuess(true); // true = remote
+        
+    } else if (data.type === 'RESTART') {
+        performRestart();
         
     } else if (data.type === 'PASS') {
         handlePass(true); // true = remote
@@ -723,7 +729,33 @@ function finishGame(customMessage = null) {
 }
 
 function resetGame() {
-    location.reload();
+    if (gameMode === 'online') {
+        // Online modda sayfayı yenileme, sinyal gönder
+        conn.send({ type: 'RESTART' });
+        performRestart();
+    } else {
+        // Diğer modlarda sayfayı yenile
+        location.reload();
+    }
+}
+
+function performRestart() {
+    // Skorları ve durumu sıfırla
+    scores = { 1: 0, 2: 0 };
+    progress = { 1: 1, 2: 1 };
+    revealedCounts = { 1: 1, 2: 1 };
+    currentPlayer = 1;
+    
+    // Bitiş ekranı elemanlarını gizle/aktif et
+    restartBtn.classList.add('hidden');
+    guessInput.disabled = false;
+    guessBtn.disabled = false;
+    passBtn.disabled = false;
+    messageEl.innerText = '';
+    messageEl.className = 'message';
+    
+    // Kurulum ekranına geri dön
+    startOnlineSetup();
 }
 
 // --- Timer Fonksiyonları ---
