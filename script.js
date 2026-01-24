@@ -68,7 +68,9 @@ const computerLists = [
     ["Hamburger", "Ekmeği", "Parası", "Kasası", "Şifresi", "Kırmak", "Dökmek"],
     ["Deniz", "Sörfü", "Tahtası", "Kurusu", "Fasulye", "Fiyatı", "Etiketi"],
     ["Kalp", "Krizi", "Masası", "Ayağı", "Parmağı", "Çıtlaması", "Kırıldı"],
-    ["Uğur", "Böceği", "İlacı", "Kutusu", "Oyunu", "Konsolu", "Aynası"]
+    ["Uğur", "Böceği", "İlacı", "Kutusu", "Oyunu", "Konsolu", "Aynası"],
+    ["Kısa", "Mesafe", "Koşusu", "Bandı", "Genişliği", "Ayarı"], // 6 Kelimelik Örnek
+    ["Elma", "Şekeri", "Pancarı", "Motoru", "Yağı", "Lekesi"]    // 6 Kelimelik Örnek
 ];
 
 // --- Başlangıç ---
@@ -116,9 +118,20 @@ function initGame(mode) {
 
     if (mode === 'pvc') {
         // Bilgisayar Modu: Rastgele liste seç ve başlat
-        const randomIndex = Math.floor(Math.random() * computerLists.length);
+        
+        // Seçilen kelime sayısına (totalWords) uygun olan listeleri filtrele
+        // Örneğin: totalWords 7 ise, sadece uzunluğu 7 ve üzeri olanları al.
+        // totalWords 6 ise, uzunluğu 6 ve üzeri olanları al.
+        const validLists = computerLists.filter(list => list.length >= totalWords);
+
+        if (validLists.length === 0) {
+            alert(`Bu uzunlukta (${totalWords}) yeterli kelime zinciri bulunamadı!`);
+            return;
+        }
+
+        const randomIndex = Math.floor(Math.random() * validLists.length);
         // Seçilen kelime sayısına göre listeyi kes
-        computerChain = computerLists[randomIndex].slice(0, totalWords);
+        computerChain = validLists[randomIndex].slice(0, totalWords);
         startGameplay();
     } else {
         // PvP Modu: Kurulum ekranına git
