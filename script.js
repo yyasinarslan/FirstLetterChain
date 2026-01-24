@@ -30,6 +30,7 @@ const timerToggle = document.getElementById('timer-toggle');
 const timerDurationInput = document.getElementById('timer-duration');
 const timerSettingsDetail = document.getElementById('timer-settings-detail');
 const timerBox = document.getElementById('timer-box');
+const wordCountInput = document.getElementById('word-count-input');
 const scoreCorrectInput = document.getElementById('score-correct-input');
 const scoreWrongInput = document.getElementById('score-wrong-input');
 const scoreTimeoutInput = document.getElementById('score-timeout-input');
@@ -111,11 +112,13 @@ function initGame(mode) {
     scoreCorrect = parseInt(scoreCorrectInput.value) || 10;
     scoreWrong = parseInt(scoreWrongInput.value) || 3;
     scoreTimeout = parseInt(scoreTimeoutInput.value) || 5;
+    totalWords = parseInt(wordCountInput.value) || 7;
 
     if (mode === 'pvc') {
         // Bilgisayar Modu: Rastgele liste seç ve başlat
         const randomIndex = Math.floor(Math.random() * computerLists.length);
-        computerChain = computerLists[randomIndex];
+        // Seçilen kelime sayısına göre listeyi kes
+        computerChain = computerLists[randomIndex].slice(0, totalWords);
         startGameplay();
     } else {
         // PvP Modu: Kurulum ekranına git
@@ -129,7 +132,7 @@ function initGame(mode) {
 // Kurulum ekranındaki inputları oluştur
 function createSetupInputs() {
     setupInputsContainer.innerHTML = '';
-    for (let i = 0; i < TOTAL_WORDS; i++) {
+    for (let i = 0; i < totalWords; i++) {
         const input = document.createElement('input');
         input.type = 'text';
         input.placeholder = `${i + 1}. Kelime`;
@@ -300,7 +303,7 @@ function handleGuess() {
         revealedCounts[currentPlayer] = 1; // Yeni kelimeye geçince ipucunu sıfırla
         
         // Oyun Bitti mi?
-        if (progress[currentPlayer] >= TOTAL_WORDS) {
+        if (progress[currentPlayer] >= totalWords) {
             finishGame();
             return;
         }
@@ -440,7 +443,7 @@ function handleTimeOut() {
     revealedCounts[currentPlayer] = 1;
 
     // Oyun bitti mi?
-    if (progress[currentPlayer] >= TOTAL_WORDS) {
+    if (progress[currentPlayer] >= totalWords) {
         finishGame();
         return;
     }
