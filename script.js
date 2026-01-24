@@ -48,6 +48,7 @@ const scoreCorrectInput = document.getElementById('score-correct-input');
 const scoreWrongInput = document.getElementById('score-wrong-input');
 const scoreTimeoutInput = document.getElementById('score-timeout-input');
 const scorePassInput = document.getElementById('score-pass-input');
+const passLimitInput = document.getElementById('pass-limit-input');
 const darkModeToggle = document.getElementById('dark-mode-toggle');
 
 // --- Oyun Durumu (State) ---
@@ -78,6 +79,8 @@ let scoreCorrect = 10;
 let scoreWrong = 3;
 let scoreTimeout = 5;
 let scorePass = 20;
+let passLimit = 2;
+let passesUsed = { 1: 0, 2: 0 };
 const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
@@ -180,6 +183,7 @@ function handleNameSubmit() {
     scoreWrong = parseInt(scoreWrongInput.value) || 3;
     scoreTimeout = parseInt(scoreTimeoutInput.value) || 5;
     scorePass = parseInt(scorePassInput.value) || 20;
+    passLimit = parseInt(passLimitInput.value) || 2;
     totalWords = parseInt(wordCountInput.value) || 7;
 
     // İsimleri Kaydet
@@ -461,6 +465,7 @@ function startGameplay() {
     revealedCounts = { 1: 1, 2: 1 };
     currentPlayer = 1;
     scores = { 1: 0, 2: 0 };
+    passesUsed = { 1: 0, 2: 0 };
     
     // Arayüz Ayarları
     if (gameMode === 'pvc') {
@@ -629,6 +634,17 @@ function handlePass(isRemote = false) {
     // Online Kontrolü
     if (gameMode === 'online' && !isRemote && currentPlayer !== myPlayerId) return;
     
+    // Pas Hakkı Kontrolü
+    if (passesUsed[currentPlayer] >= passLimit) {
+        if (!isRemote) {
+            messageEl.innerText = "Pas hakkınız kalmadı!";
+            messageEl.className = "message error";
+        }
+        return;
+    }
+
+    passesUsed[currentPlayer]++;
+
     if (gameMode === 'online' && !isRemote) conn.send({ type: 'PASS' });
 
     if (gameMode === 'pvc') {
@@ -686,20 +702,30 @@ function switchTurn() {
 function updatePlayerUI() {
     p1ScoreEl.innerText = scores[1];
     p2ScoreEl.innerText = scores[2];
+    
+    // Pas Butonu Metni ve Durumu
+    const remainingPass = Math.max(0, passLimit - passesUsed[currentPlayer]);
+    passBtn.innerText = `Pas Geç (${remainingPass})`;
 
     // Online Modda Input Kilitleme
     if (gameMode === 'online') {
         const isMyTurn = currentPlayer === myPlayerId;
         guessInput.disabled = !isMyTurn;
         guessBtn.disabled = !isMyTurn;
-        passBtn.disabled = !isMyTurn;
+        passBtn.disabled = !isMyTurn || remainingPass === 0;
         
         if (!isMyTurn) {
             guessInput.placeholder = `Sıra ${currentPlayer === 1 ? p1Name : p2Name} oyuncusunda...`;
         }
     }
 
-    if (gameMode === 'pvc') return;
+    if (gameMode === 'pvc') {
+        passBtn.disabled = remainingPass === 0;
+        return;
+    }
+    
+    // PvP Modu Pas Butonu Kontrolü
+    passBtn.disabled = remainingPass === 0;
 
     if (currentPlayer === 1) {
         p1Card.classList.add('active');
@@ -756,6 +782,7 @@ function performRestart() {
     progress = { 1: 1, 2: 1 };
     revealedCounts = { 1: 1, 2: 1 };
     currentPlayer = 1;
+    passesUsed = { 1: 0, 2: 0 };
     
     // Bitiş ekranı elemanlarını gizle/aktif et
     restartBtn.classList.add('hidden');
