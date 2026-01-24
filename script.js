@@ -59,7 +59,7 @@ const computerLists = [
 // --- Başlangıç ---
 function init() {
     // Enter tuşu ile tahmin yapabilme
-    guessInput.addEventListener('keypress', (e) => {
+    guessInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') handleGuess();
     });
 
@@ -109,6 +109,7 @@ function createSetupInputs() {
         input.type = 'text';
         input.placeholder = `${i + 1}. Kelime`;
         input.className = 'setup-input';
+        input.autocomplete = 'off';
         setupInputsContainer.appendChild(input);
     }
 }
