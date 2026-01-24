@@ -34,6 +34,7 @@ const wordCountInput = document.getElementById('word-count-input');
 const scoreCorrectInput = document.getElementById('score-correct-input');
 const scoreWrongInput = document.getElementById('score-wrong-input');
 const scoreTimeoutInput = document.getElementById('score-timeout-input');
+const darkModeToggle = document.getElementById('dark-mode-toggle');
 
 // --- Oyun Durumu (State) ---
 let gameMode = 'pvc'; // 'pvc' (Player vs Computer) veya 'pvp' (Player vs Player)
@@ -64,6 +65,19 @@ function init() {
     guessInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') handleGuess();
     });
+
+    // Dark Mode Başlangıç Kontrolü
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+        if(darkModeToggle) darkModeToggle.checked = true;
+    }
+
+    if(darkModeToggle) {
+        darkModeToggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', darkModeToggle.checked);
+        });
+    }
 
     btnPvC.addEventListener('click', () => initGame('pvc'));
     btnPvP.addEventListener('click', () => initGame('pvp'));

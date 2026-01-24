@@ -27,8 +27,12 @@
         <!-- BÖLÜM 0.5: AYARLAR EKRANI -->
         <div id="settings-screen" class="card hidden">
             <h2>Ayarlar</h2>
-            <div style="margin-bottom: 20px; text-align: left; background: #f9fafb; padding: 15px; border-radius: 8px;">
+            <div class="settings-box">
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem;">
+                    <input type="checkbox" id="dark-mode-toggle">
+                    <span>Karanlık Mod</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem; margin-top: 10px;">
                     <input type="checkbox" id="hint-toggle" checked>
                     <span>Yanlış tahminde ipucu açılsın (+1 harf)</span>
                 </label>
@@ -47,7 +51,7 @@
                 </div>
                 
                 <div style="margin-top: 15px; border-top: 1px solid #e5e7eb; padding-top: 15px;">
-                    <h3 style="font-size: 1rem; margin: 0 0 10px 0; color: #4b5563;">Puanlama Kuralları</h3>
+                    <h3 class="settings-heading">Puanlama Kuralları</h3>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <label style="font-size: 0.9rem;">Doğru Tahmin (+):</label>
                         <input type="number" id="score-correct-input" value="10" min="1" style="width: 100%; padding: 5px; border: 1px solid #e5e7eb; border-radius: 4px;">
