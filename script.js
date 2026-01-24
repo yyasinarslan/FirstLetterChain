@@ -231,7 +231,9 @@ function initOnlineLobby() {
     }
 
     // PeerJS Başlat
-    peer = new Peer(null, { debug: 2 });
+    // 5 haneli kısa bir ID oluştur (Oda Kodu)
+    const shortId = Math.random().toString(36).substring(2, 7).toUpperCase();
+    peer = new Peer(shortId, { debug: 2 });
     
     peer.on('open', (id) => {
         console.log('My peer ID is: ' + id);
@@ -244,17 +246,16 @@ function initOnlineLobby() {
     });
     
     peer.on('error', (err) => {
-        alert("Bağlantı hatası: " + err);
+        if (err.type === 'unavailable-id') {
+            alert("Oda kodu oluşturulamadı (Çakışma). Lütfen tekrar deneyin.");
+            location.reload();
+        } else {
+            alert("Bağlantı hatası: " + err);
+        }
     });
 }
 
 function createRoom() {
-    // Rastgele kısa bir kod üret
-    const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
-    // Kendi ID'mizi bu kod yapmaya çalışalım (PeerJS izin verirse) veya ID'yi gösterelim
-    // PeerJS'de custom ID çakışabilir, o yüzden Peer'in kendi ID'sini kullanmak daha güvenli ama uzun.
-    // Basitlik için Peer'in ID'sini kullanacağız ama kullanıcıya göstereceğiz.
-    
     document.getElementById('lobby-actions').innerHTML = `
         <div style="text-align:center;">
             <p>Oda Kodunuz:</p>
@@ -296,29 +297,21 @@ function handleRemoteData(data) {
     if (data.type === 'JOIN') {
         // Host: Misafir ismini aldı, oyunu başlatıyor
         p2Name = data.name; // Misafirin ismi P2 olur
-        // P1 ismi zaten bizde (p1Name)
+        // Kurulumu başlat
+        conn.send({ type: 'SETUP_INIT', p1Name: p1Name });
+        startOnlineSetup();
         
-        // Rastgele kelimeler seç
-        const validLists = computerLists.filter(list => list.length >= totalWords);
-        const list1 = validLists[Math.floor(Math.random() * validLists.length)].slice(0, totalWords);
-        const list2 = validLists[Math.floor(Math.random() * validLists.length)].slice(0, totalWords);
+    } else if (data.type === 'SETUP_INIT') {
+        // Guest: Kurulum emri aldı
+        p1Name = data.p1Name;
+        startOnlineSetup();
+
+    } else if (data.type === 'SETUP_DONE') {
+        // Karşı taraf kelimelerini hazırladı
+        if (myPlayerId === 1) p2Chain = data.chain; // Host, P2'nin hazırladığını aldı
+        else p1Chain = data.chain; // Guest, P1'in hazırladığını aldı
         
-        p1Chain = list1;
-        p2Chain = list2;
-        
-        // Misafire oyun verilerini gönder
-        conn.send({ type: 'START', p1Chain, p2Chain, p1Name, p2Name });
-        startGameplay();
-        
-    } else if (data.type === 'START') {
-        // Guest: Oyun verilerini aldı
-        p1Chain = data.p1Chain;
-        p2Chain = data.p2Chain;
-        p1Name = data.p1Name; // Host'un ismi
-        p2Name = p1NameInput.value; // Kendi ismimiz (inputta kalmıştı)
-        
-        onlineLobbyScreen.classList.add('hidden');
-        startGameplay();
+        checkOnlineStart();
         
     } else if (data.type === 'GUESS') {
         guessInput.value = data.value;
@@ -326,6 +319,39 @@ function handleRemoteData(data) {
         
     } else if (data.type === 'PASS') {
         handlePass(true); // true = remote
+    }
+}
+
+function startOnlineSetup() {
+    onlineLobbyScreen.classList.add('hidden');
+    setupScreen.classList.remove('hidden');
+    createSetupInputs();
+    
+    // Zincirleri sıfırla
+    p1Chain = [];
+    p2Chain = [];
+
+    // UI Hazırlığı
+    const inputs = document.querySelectorAll('.setup-input');
+    inputs.forEach(input => input.value = '');
+    setupInputsContainer.classList.remove('hidden');
+    setupRandomBtn.classList.remove('hidden');
+    setupActionBtn.disabled = false;
+
+    if (myPlayerId === 1) {
+        setupTitle.innerText = `${p1Name} Hazırlığı`;
+        setupDesc.innerText = `${p2Name} için kelimeleri giriniz.`;
+    } else {
+        setupTitle.innerText = `${p2Name} Hazırlığı`;
+        setupDesc.innerText = `${p1Name} için kelimeleri giriniz.`;
+    }
+    setupActionBtn.innerText = "Hazır ve Gönder";
+}
+
+function checkOnlineStart() {
+    if (p1Chain.length > 0 && p2Chain.length > 0) {
+        setupScreen.classList.add('hidden');
+        startGameplay();
     }
 }
 
@@ -394,6 +420,25 @@ function handleSetupAction() {
 
     if (!isValid) {
         alert("Lütfen tüm kelimeleri giriniz!");
+        return;
+    }
+
+    if (gameMode === 'online') {
+        if (myPlayerId === 1) {
+            p1Chain = currentWords; // Host kendi hazırladığını kaydetti
+            conn.send({ type: 'SETUP_DONE', chain: p1Chain });
+        } else {
+            p2Chain = currentWords; // Guest kendi hazırladığını kaydetti
+            conn.send({ type: 'SETUP_DONE', chain: p2Chain });
+        }
+        
+        // Bekleme Moduna Geç
+        setupInputsContainer.classList.add('hidden');
+        setupRandomBtn.classList.add('hidden');
+        setupActionBtn.disabled = true;
+        setupDesc.innerText = "Rakibin kelimeleri hazırlaması bekleniyor...";
+        
+        checkOnlineStart();
         return;
     }
 
@@ -617,6 +662,7 @@ function switchTurn() {
     currentPlayer = currentPlayer === 1 ? 2 : 1;
     renderBoard(); // Tahtayı yeni oyuncunun hedef zincirine göre güncelle
     startTimer(); // Sıra değişince süre başa döner
+    updatePlayerUI(); // UI'ı güncelle (Pas geçildiğinde butonları kilitlemek/açmak için şart)
 }
 
 function updatePlayerUI() {
