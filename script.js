@@ -231,9 +231,7 @@ function initOnlineLobby() {
     }
 
     // PeerJS Başlat
-    // 5 haneli kısa bir ID oluştur (Oda Kodu)
-    const shortId = Math.random().toString(36).substring(2, 7).toUpperCase();
-    peer = new Peer(shortId, { debug: 2 });
+    peer = new Peer(null, { debug: 2 });
     
     peer.on('open', (id) => {
         console.log('My peer ID is: ' + id);
@@ -246,12 +244,7 @@ function initOnlineLobby() {
     });
     
     peer.on('error', (err) => {
-        if (err.type === 'unavailable-id') {
-            alert("Oda kodu oluşturulamadı (Çakışma). Lütfen tekrar deneyin.");
-            location.reload();
-        } else {
-            alert("Bağlantı hatası: " + err);
-        }
+        alert("Bağlantı hatası: " + err);
     });
 }
 
@@ -259,7 +252,7 @@ function createRoom() {
     document.getElementById('lobby-actions').innerHTML = `
         <div style="text-align:center;">
             <p>Oda Kodunuz:</p>
-            <h1 style="font-size: 2rem; letter-spacing: 5px; color: var(--primary); margin: 10px 0;">${peer.id}</h1>
+            <h1 style="font-size: 1.2rem; letter-spacing: 1px; color: var(--primary); margin: 10px 0; word-break: break-all;">${peer.id}</h1>
             <p class="info-text">Arkadaşınla bu kodu paylaş ve bekle...</p>
             <div class="loader" style="margin: 20px auto;"></div>
         </div>
