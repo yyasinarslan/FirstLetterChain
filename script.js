@@ -100,7 +100,7 @@ const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
-const GAME_VERSION = "v3.0";
+const GAME_VERSION = "v4.0";
 function init() {
     console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
