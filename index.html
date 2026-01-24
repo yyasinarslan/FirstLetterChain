@@ -77,6 +77,9 @@
 
                         <label style="font-size: 0.9rem;">Süre Cezası (-):</label>
                         <input type="number" id="score-timeout-input" value="5" min="0" style="width: 100%; padding: 5px; border: 1px solid #e5e7eb; border-radius: 4px;">
+
+                        <label style="font-size: 0.9rem;">Pas Cezası (-):</label>
+                        <input type="number" id="score-pass-input" value="20" min="0" style="width: 100%; padding: 5px; border: 1px solid #e5e7eb; border-radius: 4px;">
                     </div>
                 </div>
             </div>
@@ -119,6 +122,7 @@
             <div class="interaction-area">
                 <input type="text" id="guess-input" placeholder="Sıradaki kelimeyi tahmin et..." autocomplete="off">
                 <button id="guess-btn" class="action-btn">Tahmin Et</button>
+                <button id="pass-btn" class="secondary-btn" style="margin-top: 10px;">Pas Geç</button>
             </div>
             <p id="message" class="message"></p>
             

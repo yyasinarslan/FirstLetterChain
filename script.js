@@ -21,6 +21,7 @@ const setupRandomBtn = document.getElementById('setup-random-btn');
 const wordChainContainer = document.getElementById('word-chain');
 const guessInput = document.getElementById('guess-input');
 const guessBtn = document.getElementById('guess-btn');
+const passBtn = document.getElementById('pass-btn');
 const messageEl = document.getElementById('message');
 const restartBtn = document.getElementById('restart-btn');
 const p1Card = document.getElementById('p1-card');
@@ -41,6 +42,7 @@ const wordCountInput = document.getElementById('word-count-input');
 const scoreCorrectInput = document.getElementById('score-correct-input');
 const scoreWrongInput = document.getElementById('score-wrong-input');
 const scoreTimeoutInput = document.getElementById('score-timeout-input');
+const scorePassInput = document.getElementById('score-pass-input');
 const darkModeToggle = document.getElementById('dark-mode-toggle');
 
 // --- Oyun Durumu (State) ---
@@ -65,6 +67,7 @@ let timerInterval = null;
 let scoreCorrect = 10;
 let scoreWrong = 3;
 let scoreTimeout = 5;
+let scorePass = 20;
 const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
@@ -111,6 +114,7 @@ function init() {
     setupRandomBtn.addEventListener('click', fillRandomSetup);
     nameSubmitBtn.addEventListener('click', handleNameSubmit);
     guessBtn.addEventListener('click', handleGuess);
+    passBtn.addEventListener('click', handlePass);
     restartBtn.addEventListener('click', resetGame);
 }
 
@@ -144,6 +148,7 @@ function handleNameSubmit() {
     scoreCorrect = parseInt(scoreCorrectInput.value) || 10;
     scoreWrong = parseInt(scoreWrongInput.value) || 3;
     scoreTimeout = parseInt(scoreTimeoutInput.value) || 5;
+    scorePass = parseInt(scorePassInput.value) || 20;
     totalWords = parseInt(wordCountInput.value) || 7;
 
     // İsimleri Kaydet
@@ -420,6 +425,33 @@ function handleGuess() {
     updatePlayerUI();
 }
 
+function handlePass() {
+    if (gameMode === 'pvc') {
+        // PvC: Kelimeyi atla (Pes et)
+        scores[currentPlayer] -= scorePass; // Ceza uygula
+        messageEl.innerText = `Pas geçildi! -${scorePass} Puan. Kelime açıldı.`;
+        messageEl.className = "message error";
+
+        progress[currentPlayer]++;
+        revealedCounts[currentPlayer] = 1;
+
+        if (progress[currentPlayer] >= totalWords) {
+            finishGame();
+            return;
+        }
+
+        guessInput.value = '';
+        renderBoard();
+        startTimer();
+    } else {
+        // PvP: Sırayı devret
+        messageEl.innerText = "Pas geçildi. Sıra diğer oyuncuda.";
+        messageEl.className = "message";
+        guessInput.value = '';
+        switchTurn();
+    }
+}
+
 function switchTurn() {
     currentPlayer = currentPlayer === 1 ? 2 : 1;
     renderBoard(); // Tahtayı yeni oyuncunun hedef zincirine göre güncelle
@@ -464,6 +496,7 @@ function finishGame(customMessage = null) {
     messageEl.innerText = resultText;
     guessInput.disabled = true;
     guessBtn.disabled = true;
+    passBtn.disabled = true;
     restartBtn.classList.remove('hidden');
     renderBoard();
 }
