@@ -311,7 +311,8 @@ function handleGuess() {
         startTimer(); // Yeni kelime için süreyi sıfırla
     } else {
         // YANLIŞ
-        messageEl.innerText = "Yanlış!";
+        scores[currentPlayer] -= 3;
+        messageEl.innerText = "Yanlış! (-3 Puan)";
         messageEl.className = "message error";
         guessInput.classList.add('shake');
         setTimeout(() => guessInput.classList.remove('shake'), 500);
@@ -320,15 +321,15 @@ function handleGuess() {
         
         if (gameMode === 'pvp') {
             if (isHintEnabled) {
-                messageEl.innerText = "Yanlış! Sıra geçti. (Bir sonraki turda +1 harf ipucu)";
+                messageEl.innerText = "Yanlış! -3 Puan. Sıra geçti. (Sonraki turda ipucu)";
                 revealedCounts[currentPlayer]++; // Bilemediği için bir harf daha açılacak
             } else {
-                messageEl.innerText = "Yanlış! Sıra diğer oyuncuya geçiyor.";
+                messageEl.innerText = "Yanlış! -3 Puan. Sıra diğer oyuncuya geçiyor.";
             }
             switchTurn();
         } else {
             if (isHintEnabled) {
-                messageEl.innerText = "Yanlış! İpucu açıldı (+1 harf).";
+                messageEl.innerText = "Yanlış! -3 Puan. İpucu açıldı (+1 harf).";
                 revealedCounts[currentPlayer]++;
                 renderBoard();
             }
@@ -366,6 +367,7 @@ function updatePlayerUI() {
 
 function finishGame(customMessage = null) {
     stopTimer();
+    updatePlayerUI();
     let resultText = "";
     if (customMessage) {
         resultText = customMessage;
