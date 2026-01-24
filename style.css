@@ -243,6 +243,53 @@ input[type="text"]:focus {
     100% { transform: scale(1); }
 }
 
+/* Chat Styles */
+.chat-box {
+    margin-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 15px;
+}
+
+.chat-messages {
+    height: 150px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background: #f9fafb;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.chat-message {
+    max-width: 80%;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    word-wrap: break-word;
+}
+
+.chat-message.self {
+    align-self: flex-end;
+    background-color: var(--primary);
+    color: white;
+    border-bottom-right-radius: 2px;
+}
+
+.chat-message.remote {
+    align-self: flex-start;
+    background-color: #e5e7eb;
+    color: var(--text-main);
+    border-bottom-left-radius: 2px;
+}
+
+.chat-input-area {
+    display: flex;
+    gap: 10px;
+}
+
 /* --- Responsive & Mobile Düzenlemeleri --- */
 
 /* Küçük Laptoplar ve Tabletler için */
@@ -341,4 +388,14 @@ body.dark-mode .action-btn {
 
 body.dark-mode .action-btn:hover {
     background-color: #e5e7eb;
+}
+
+body.dark-mode .chat-messages {
+    background-color: #374151;
+    border-color: #4b5563;
+}
+
+body.dark-mode .chat-message.remote {
+    background-color: #4b5563;
+    color: white;
 }

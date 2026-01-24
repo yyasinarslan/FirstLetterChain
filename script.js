@@ -28,6 +28,10 @@ const guessBtn = document.getElementById('guess-btn');
 const passBtn = document.getElementById('pass-btn');
 const messageEl = document.getElementById('message');
 const restartBtn = document.getElementById('restart-btn');
+const chatContainer = document.getElementById('chat-container');
+const chatMessages = document.getElementById('chat-messages');
+const chatInput = document.getElementById('chat-input');
+const chatSendBtn = document.getElementById('chat-send-btn');
 const p1Card = document.getElementById('p1-card');
 const p2Card = document.getElementById('p2-card');
 const p1ScoreEl = document.getElementById('p1-score');
@@ -146,6 +150,12 @@ function init() {
     if(guessBtn) guessBtn.addEventListener('click', () => handleGuess(false));
     if(passBtn) passBtn.addEventListener('click', () => handlePass(false));
     if(restartBtn) restartBtn.addEventListener('click', resetGame);
+    if(chatSendBtn) chatSendBtn.addEventListener('click', sendChatMessage);
+    if(chatInput) {
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+    }
 }
 
 // Oyun Modu Seçimi ve Başlatma
@@ -364,6 +374,9 @@ function handleRemoteData(data) {
         
     } else if (data.type === 'PASS') {
         handlePass(true); // true = remote
+        
+    } else if (data.type === 'CHAT') {
+        appendChatMessage(data.message, false);
     }
 }
 
@@ -508,6 +521,14 @@ function startGameplay() {
     currentPlayer = 1;
     scores = { 1: 0, 2: 0 };
     passesUsed = { 1: 0, 2: 0 };
+
+    // Chat Görünürlüğü
+    if (gameMode === 'online') {
+        chatContainer.classList.remove('hidden');
+        chatMessages.innerHTML = ''; // Önceki mesajları temizle
+    } else {
+        chatContainer.classList.add('hidden');
+    }
     
     // Arayüz Ayarları
     if (gameMode === 'pvc') {
@@ -836,6 +857,30 @@ function performRestart() {
     
     // Kurulum ekranına geri dön
     startOnlineSetup();
+}
+
+// --- Chat Fonksiyonları ---
+function sendChatMessage() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+    
+    // Kendimizde göster
+    appendChatMessage(text, true);
+    
+    // Gönder
+    if (gameMode === 'online' && conn) {
+        conn.send({ type: 'CHAT', message: text });
+    }
+    
+    chatInput.value = '';
+}
+
+function appendChatMessage(text, isSelf) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `chat-message ${isSelf ? 'self' : 'remote'}`;
+    msgDiv.innerText = text;
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight; // En alta kaydır
 }
 
 // --- Timer Fonksiyonları ---
