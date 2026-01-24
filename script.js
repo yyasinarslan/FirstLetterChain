@@ -94,7 +94,7 @@ const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
-const GAME_VERSION = "v0.2.1";
+const GAME_VERSION = "v0.2.2";
 function init() {
     console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
@@ -214,7 +214,7 @@ function handleNameSubmit() {
     scoreWrong = parseInt(scoreWrongInput.value) || 3;
     scoreTimeout = parseInt(scoreTimeoutInput.value) || 5;
     scorePass = parseInt(scorePassInput.value) || 20;
-    passLimit = parseInt(passLimitInput.value) || 2;
+    passLimit = parseInt(passLimitInput.value) || 1;
     totalWords = parseInt(wordCountInput.value) || 7;
 
     // İsimleri Kaydet
