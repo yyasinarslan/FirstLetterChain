@@ -100,7 +100,7 @@ const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
-const GAME_VERSION = "v4.1";
+const GAME_VERSION = "v4.3";
 function init() {
     console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
@@ -502,7 +502,7 @@ function fillRandomSetup() {
     if (gameMode === 'pvp' && setupStep === 2) {
         chainToAvoid = p1Chain;
     } else if (gameMode === 'online') {
-        // Eğer karşı tarafın zinciri geldiyse, onu engelle
+        // Eğer karşı tarafın zinciri geldiyse (önce o bastıysa), onu engelle
         if (myPlayerId === 1 && p2Chain.length > 0) chainToAvoid = p2Chain;
         else if (myPlayerId === 2 && p1Chain.length > 0) chainToAvoid = p1Chain;
     }
@@ -545,6 +545,15 @@ function handleSetupAction() {
     }
 
     if (gameMode === 'online') {
+        // Çakışma Kontrolü: Eğer rakip bizden önce hazır olduysa, onun zincirini seçmemeliyiz
+        let opponentChain = (myPlayerId === 1) ? p2Chain : p1Chain;
+        if (opponentChain && opponentChain.length > 0) {
+            if (JSON.stringify(currentWords) === JSON.stringify(opponentChain)) {
+                alert("Rakibiniz de bu kelime zincirini seçmiş! Lütfen 'Rastgele Doldur' diyerek veya elle değiştirerek farklı bir zincir belirleyin.");
+                return;
+            }
+        }
+
         if (myPlayerId === 1) {
             p1Chain = currentWords; // Host kendi hazırladığını kaydetti
             conn.send({ type: 'SETUP_DONE', chain: p1Chain });
