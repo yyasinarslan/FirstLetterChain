@@ -26,6 +26,10 @@ const btnPvP = document.getElementById('btn-pvp');
 const hintToggle = document.getElementById('hint-toggle');
 const btnSettings = document.getElementById('btn-settings');
 const btnSettingsBack = document.getElementById('btn-settings-back');
+const timerToggle = document.getElementById('timer-toggle');
+const timerDurationInput = document.getElementById('timer-duration');
+const timerSettingsDetail = document.getElementById('timer-settings-detail');
+const timerBox = document.getElementById('timer-box');
 
 // --- Oyun Durumu (State) ---
 let gameMode = 'pvc'; // 'pvc' (Player vs Computer) veya 'pvp' (Player vs Player)
@@ -40,6 +44,10 @@ let currentPlayer = 1; // 1 veya 2
 let scores = { 1: 0, 2: 0 };
 let setupStep = 1; // PvP kurulum aşaması (1: P1 giriyor, 2: P2 giriyor)
 let isHintEnabled = true; // Ayar: Yanlış tahminde ipucu verilsin mi?
+let isTimerEnabled = false;
+let timerDuration = 30;
+let currentTime = 0;
+let timerInterval = null;
 const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
@@ -75,6 +83,12 @@ function init() {
         settingsScreen.classList.add('hidden');
         menuScreen.classList.remove('hidden');
     });
+
+    // Timer Ayarı Görünürlüğü
+    timerToggle.addEventListener('change', () => {
+        if(timerToggle.checked) timerSettingsDetail.classList.remove('hidden');
+        else timerSettingsDetail.classList.add('hidden');
+    });
     
     setupActionBtn.addEventListener('click', handleSetupAction);
     guessBtn.addEventListener('click', handleGuess);
@@ -86,6 +100,8 @@ function initGame(mode) {
     gameMode = mode;
     menuScreen.classList.add('hidden');
     isHintEnabled = hintToggle.checked; // Ayarı oku
+    isTimerEnabled = timerToggle.checked;
+    timerDuration = parseInt(timerDurationInput.value) || 30;
 
     if (mode === 'pvc') {
         // Bilgisayar Modu: Rastgele liste seç ve başlat
@@ -182,6 +198,7 @@ function startGameplay() {
     updatePlayerUI();
     renderBoard();
     guessInput.focus();
+    startTimer();
 }
 
 // Oyun Tahtasını Çiz
@@ -291,6 +308,7 @@ function handleGuess() {
         
         guessInput.value = '';
         renderBoard();
+        startTimer(); // Yeni kelime için süreyi sıfırla
     } else {
         // YANLIŞ
         messageEl.innerText = "Yanlış!";
@@ -322,6 +340,7 @@ function handleGuess() {
 function switchTurn() {
     currentPlayer = currentPlayer === 1 ? 2 : 1;
     renderBoard(); // Tahtayı yeni oyuncunun hedef zincirine göre güncelle
+    startTimer(); // Sıra değişince süre başa döner
 }
 
 function updatePlayerUI() {
@@ -345,9 +364,12 @@ function updatePlayerUI() {
     }
 }
 
-function finishGame() {
+function finishGame(customMessage = null) {
+    stopTimer();
     let resultText = "";
-    if (gameMode === 'pvc') {
+    if (customMessage) {
+        resultText = customMessage;
+    } else if (gameMode === 'pvc') {
         resultText = `Tebrikler! Zinciri tamamladın. Puanın: ${scores[1]} 🏆`;
     } else {
         // PvP Bitiş
@@ -364,6 +386,68 @@ function finishGame() {
 
 function resetGame() {
     location.reload();
+}
+
+// --- Timer Fonksiyonları ---
+function startTimer() {
+    stopTimer(); // Öncekini temizle
+    if (!isTimerEnabled) {
+        timerBox.classList.add('hidden');
+        return;
+    }
+
+    currentTime = timerDuration;
+    timerBox.classList.remove('hidden');
+    updateTimerDisplay();
+
+    timerInterval = setInterval(() => {
+        currentTime--;
+        updateTimerDisplay();
+        if (currentTime <= 0) {
+            handleTimeOut();
+        }
+    }, 1000);
+}
+
+function stopTimer() {
+    clearInterval(timerInterval);
+    timerBox.classList.remove('warning');
+}
+
+function updateTimerDisplay() {
+    timerBox.innerText = currentTime;
+    if (currentTime <= 5) timerBox.classList.add('warning');
+    else timerBox.classList.remove('warning');
+}
+
+function handleTimeOut() {
+    stopTimer();
+    
+    // Puan cezası ve kelimeyi geçme
+    scores[currentPlayer] -= 5; 
+    progress[currentPlayer]++;
+    revealedCounts[currentPlayer] = 1;
+
+    // Oyun bitti mi?
+    if (progress[currentPlayer] >= TOTAL_WORDS) {
+        finishGame();
+        return;
+    }
+
+    if (gameMode === 'pvc') {
+        messageEl.innerText = "Süre doldu! -5 Puan. Kelime açıldı.";
+        messageEl.className = "message error";
+        guessInput.value = '';
+        updatePlayerUI();
+        renderBoard();
+        startTimer();
+    } else {
+        messageEl.innerText = "Süre doldu! -5 Puan. Kelime açıldı, sıra geçti.";
+        messageEl.className = "message error";
+        guessInput.value = '';
+        switchTurn();
+        updatePlayerUI();
+    }
 }
 
 // Başlat

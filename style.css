@@ -182,3 +182,29 @@ input[type="text"]:focus {
 }
 
 .shake { animation: shake 0.3s ease-in-out; }
+
+/* Timer Styles */
+.timer-badge {
+    background: var(--text-main);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 1.5rem;
+    margin: 0 auto 20px auto;
+    width: fit-content;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background-color 0.3s;
+}
+
+.timer-badge.warning {
+    background-color: var(--error);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
