@@ -21,6 +21,7 @@
             
             <button id="btn-pvc" class="primary-btn" style="margin-bottom: 10px;">🤖 Bilgisayara Karşı</button>
             <button id="btn-pvp" class="action-btn">👥 İki Kişilik (PvP)</button>
+            <button id="btn-online" class="action-btn" style="background-color: #7c3aed; margin-top: 10px;">🌐 Online (P2P)</button>
             <button id="btn-settings" class="secondary-btn">⚙️ Ayarlar</button>
         </div>
 
@@ -38,6 +39,24 @@
                 </div>
             </div>
             <button id="name-submit-btn" class="primary-btn">Devam Et</button>
+        </div>
+
+        <!-- BÖLÜM 0.3: ONLINE LOBİ -->
+        <div id="online-lobby-screen" class="card hidden">
+            <h2>Online Lobi</h2>
+            <p id="lobby-status" class="info-text">Ne yapmak istersiniz?</p>
+            
+            <div id="lobby-actions">
+                <button id="btn-create-room" class="primary-btn" style="margin-bottom: 15px;">Oda Oluştur</button>
+                
+                <div style="border-top: 1px solid #e5e7eb; padding-top: 15px; margin-top: 15px;">
+                    <label style="display:block; margin-bottom: 5px; font-size: 0.9rem;">Oda Kodu:</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="room-code-input" placeholder="Kodu girin..." style="text-transform: uppercase;">
+                        <button id="btn-join-room" class="action-btn" style="width: auto; margin-top: 0;">Katıl</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- BÖLÜM 0.5: AYARLAR EKRANI -->
@@ -130,6 +149,7 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="words.js"></script>
     <script src="script.js"></script>
 </body>

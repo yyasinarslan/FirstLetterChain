@@ -10,6 +10,10 @@ const p2NameInput = document.getElementById('p2-name-input');
 const p2NameInputGroup = document.getElementById('p2-name-input-group');
 const p1NameLabel = document.getElementById('p1-name-label');
 const nameSubmitBtn = document.getElementById('name-submit-btn');
+const onlineLobbyScreen = document.getElementById('online-lobby-screen');
+const btnCreateRoom = document.getElementById('btn-create-room');
+const btnJoinRoom = document.getElementById('btn-join-room');
+const roomCodeInput = document.getElementById('room-code-input');
 const settingsScreen = document.getElementById('settings-screen');
 const setupScreen = document.getElementById('setup-screen');
 const gameScreen = document.getElementById('game-screen');
@@ -31,6 +35,7 @@ const p2ScoreEl = document.getElementById('p2-score');
 const turnIndicator = document.getElementById('turn-indicator');
 const btnPvC = document.getElementById('btn-pvc');
 const btnPvP = document.getElementById('btn-pvp');
+const btnOnline = document.getElementById('btn-online');
 const hintToggle = document.getElementById('hint-toggle');
 const btnSettings = document.getElementById('btn-settings');
 const btnSettingsBack = document.getElementById('btn-settings-back');
@@ -52,6 +57,11 @@ let p2Chain = []; // 2. Oyuncunun hazırladığı (1. Oyuncunun tahmin edeceği)
 let computerChain = []; // Bilgisayar modu için
 let p1Name = "";
 let p2Name = "";
+
+// Online Değişkenleri
+let peer = null;
+let conn = null;
+let myPlayerId = 0; // 0: Offline, 1: Host (P1), 2: Guest (P2)
 
 // İlerleme Durumları (Hangi kelimedeler)
 let progress = { 1: 1, 2: 1 }; 
@@ -93,6 +103,7 @@ function init() {
 
     btnPvC.addEventListener('click', () => initGame('pvc'));
     btnPvP.addEventListener('click', () => initGame('pvp'));
+    btnOnline.addEventListener('click', () => initGame('online'));
 
     // Ayarlar Menüsü Geçişleri
     btnSettings.addEventListener('click', () => {
@@ -113,6 +124,8 @@ function init() {
     setupActionBtn.addEventListener('click', handleSetupAction);
     setupRandomBtn.addEventListener('click', fillRandomSetup);
     nameSubmitBtn.addEventListener('click', handleNameSubmit);
+    btnCreateRoom.addEventListener('click', createRoom);
+    btnJoinRoom.addEventListener('click', joinRoom);
     guessBtn.addEventListener('click', handleGuess);
     passBtn.addEventListener('click', handlePass);
     restartBtn.addEventListener('click', resetGame);
@@ -128,10 +141,14 @@ function initGame(mode) {
     p1NameInput.value = '';
     p2NameInput.value = '';
 
-    if (mode === 'pvc') {
+    if (mode === 'pvc' || mode === 'online') {
         p2NameInputGroup.classList.add('hidden');
         p1NameLabel.innerText = "Oyuncu Adı";
         p1NameInput.placeholder = "Adınızı giriniz...";
+        if (mode === 'online') {
+            // Online modda isim girdikten sonra lobiye gideceğiz
+            nameSubmitBtn.innerText = "Lobiye Git";
+        }
     } else {
         p2NameInputGroup.classList.remove('hidden');
         p1NameLabel.innerText = "1. Oyuncu Adı";
@@ -154,6 +171,13 @@ function handleNameSubmit() {
     // İsimleri Kaydet
     p1Name = p1NameInput.value.trim() || (gameMode === 'pvc' ? 'Oyuncu' : '1. Oyuncu');
     p2Name = p2NameInput.value.trim() || '2. Oyuncu';
+    
+    if (gameMode === 'online') {
+        // Online modda isim P1 veya P2 olarak atanacak, şimdilik geçici tutuyoruz
+        nameEntryScreen.classList.add('hidden');
+        initOnlineLobby();
+        return;
+    }
 
     nameEntryScreen.classList.add('hidden');
 
@@ -180,6 +204,108 @@ function handleNameSubmit() {
         createSetupInputs();
         setupScreen.classList.remove('hidden');
         updateSetupUI();
+    }
+}
+
+// --- ONLINE MANTIK ---
+function initOnlineLobby() {
+    onlineLobbyScreen.classList.remove('hidden');
+    // PeerJS Başlat
+    peer = new Peer(null, { debug: 2 });
+    
+    peer.on('open', (id) => {
+        console.log('My peer ID is: ' + id);
+    });
+
+    peer.on('connection', (c) => {
+        // Host tarafı: Birisi bağlandı
+        conn = c;
+        setupConnectionHandlers();
+    });
+    
+    peer.on('error', (err) => {
+        alert("Bağlantı hatası: " + err);
+    });
+}
+
+function createRoom() {
+    // Rastgele kısa bir kod üret
+    const roomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
+    // Kendi ID'mizi bu kod yapmaya çalışalım (PeerJS izin verirse) veya ID'yi gösterelim
+    // PeerJS'de custom ID çakışabilir, o yüzden Peer'in kendi ID'sini kullanmak daha güvenli ama uzun.
+    // Basitlik için Peer'in ID'sini kullanacağız ama kullanıcıya göstereceğiz.
+    
+    document.getElementById('lobby-actions').innerHTML = `
+        <div style="text-align:center;">
+            <p>Oda Kodunuz:</p>
+            <h1 style="font-size: 2rem; letter-spacing: 5px; color: var(--primary); margin: 10px 0;">${peer.id}</h1>
+            <p class="info-text">Arkadaşınla bu kodu paylaş ve bekle...</p>
+            <div class="loader" style="margin: 20px auto;"></div>
+        </div>
+    `;
+    myPlayerId = 1; // Host her zaman P1
+}
+
+function joinRoom() {
+    const code = roomCodeInput.value.trim();
+    if (!code) return;
+    
+    conn = peer.connect(code);
+    myPlayerId = 2; // Katılan her zaman P2
+    
+    conn.on('open', () => {
+        setupConnectionHandlers();
+        // Bağlandık, ismimizi gönderelim
+        conn.send({ type: 'JOIN', name: p1Name }); // p1Name değişkeninde kendi ismimiz var şu an
+        document.getElementById('lobby-actions').innerHTML = `<p>Bağlanıldı! Oyun başlatılıyor...</p>`;
+    });
+}
+
+function setupConnectionHandlers() {
+    conn.on('data', (data) => {
+        handleRemoteData(data);
+    });
+
+    // Eğer Host isek ve bağlantı sağlandıysa oyunu kur
+    if (myPlayerId === 1) {
+        // Bekle, karşı taraf ismini göndersin ('JOIN' mesajı)
+    }
+}
+
+function handleRemoteData(data) {
+    if (data.type === 'JOIN') {
+        // Host: Misafir ismini aldı, oyunu başlatıyor
+        p2Name = data.name; // Misafirin ismi P2 olur
+        // P1 ismi zaten bizde (p1Name)
+        
+        // Rastgele kelimeler seç
+        const validLists = computerLists.filter(list => list.length >= totalWords);
+        const list1 = validLists[Math.floor(Math.random() * validLists.length)].slice(0, totalWords);
+        const list2 = validLists[Math.floor(Math.random() * validLists.length)].slice(0, totalWords);
+        
+        p1Chain = list1;
+        p2Chain = list2;
+        
+        // Misafire oyun verilerini gönder
+        conn.send({ type: 'START', p1Chain, p2Chain, p1Name, p2Name });
+        startGameplay();
+        
+    } else if (data.type === 'START') {
+        // Guest: Oyun verilerini aldı
+        p1Chain = data.p1Chain;
+        p2Chain = data.p2Chain;
+        p1Name = data.p1Name; // Host'un ismi
+        p2Name = p1NameInput.value; // Kendi ismimiz (inputta kalmıştı)
+        
+        onlineLobbyScreen.classList.add('hidden');
+        startGameplay();
+        
+    } else if (data.type === 'GUESS') {
+        guessInput.value = data.value;
+        handleGuess(true); // true = remote
+        
+    } else if (data.type === 'PASS') {
+        handlePass(true); // true = remote
     }
 }
 
@@ -264,6 +390,7 @@ function handleSetupAction() {
 
 function startGameplay() {
     gameScreen.classList.remove('hidden');
+    onlineLobbyScreen.classList.add('hidden');
     
     // Sıfırlama
     progress = { 1: 1, 2: 1 };
@@ -352,8 +479,12 @@ function renderBoard() {
 }
 
 // Tahmin Kontrolü
-function handleGuess() {
+function handleGuess(isRemote = false) {
     const userGuess = guessInput.value.trim();
+    
+    // Online Kontrolü: Sıra bende değilse işlem yapma (Local ise)
+    if (gameMode === 'online' && !isRemote && currentPlayer !== myPlayerId) return;
+    
     if (!userGuess) return;
 
     // Hedef kelimeyi bul
@@ -364,6 +495,11 @@ function handleGuess() {
         // PvP: P1 oynuyorsa hedef p2Chain'deki sıradaki kelime
         if (currentPlayer === 1) correctWord = p2Chain[progress[1]];
         else correctWord = p1Chain[progress[2]];
+    }
+
+    // Online: Hamleyi gönder (Eğer biz yaptıysak)
+    if (gameMode === 'online' && !isRemote) {
+        conn.send({ type: 'GUESS', value: userGuess });
     }
 
     // Karşılaştırma
@@ -425,7 +561,12 @@ function handleGuess() {
     updatePlayerUI();
 }
 
-function handlePass() {
+function handlePass(isRemote = false) {
+    // Online Kontrolü
+    if (gameMode === 'online' && !isRemote && currentPlayer !== myPlayerId) return;
+    
+    if (gameMode === 'online' && !isRemote) conn.send({ type: 'PASS' });
+
     if (gameMode === 'pvc') {
         // PvC: Kelimeyi atla (Pes et)
         scores[currentPlayer] -= scorePass; // Ceza uygula
@@ -461,6 +602,18 @@ function switchTurn() {
 function updatePlayerUI() {
     p1ScoreEl.innerText = scores[1];
     p2ScoreEl.innerText = scores[2];
+
+    // Online Modda Input Kilitleme
+    if (gameMode === 'online') {
+        const isMyTurn = currentPlayer === myPlayerId;
+        guessInput.disabled = !isMyTurn;
+        guessBtn.disabled = !isMyTurn;
+        passBtn.disabled = !isMyTurn;
+        
+        if (!isMyTurn) {
+            guessInput.placeholder = `Sıra ${currentPlayer === 1 ? p1Name : p2Name} oyuncusunda...`;
+        }
+    }
 
     if (gameMode === 'pvc') return;
 
