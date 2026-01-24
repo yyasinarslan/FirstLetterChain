@@ -94,7 +94,7 @@ const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
-const GAME_VERSION = "v0.2.2";
+const GAME_VERSION = "v1.4";
 function init() {
     console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
@@ -403,6 +403,9 @@ function handleRemoteData(data) {
         
     } else if (data.type === 'TYPING') {
         showTypingIndicator();
+        
+    } else if (data.type === 'TIMEOUT') {
+        handleTimeOut(true); // true = remote
     }
 }
 
@@ -971,29 +974,52 @@ function updateTimerDisplay() {
     else timerBox.classList.remove('warning');
 }
 
-function handleTimeOut() {
+function handleTimeOut(isRemote = false) {
     stopTimer();
+    
+    // Online Mod Senkronizasyonu
+    if (gameMode === 'online') {
+        if (!isRemote) {
+            // Yerel timer bitti
+            if (currentPlayer === myPlayerId) {
+                // Sıra bende, timeout benim suçum. Karşıya bildir.
+                conn.send({ type: 'TIMEOUT' });
+            } else {
+                // Sıra bende değil ama timerım bitti.
+                // Hiçbir şey yapma, rakibin 'TIMEOUT' veya hamle göndermesini bekle.
+                return;
+            }
+        }
+        // isRemote true ise (karşıdan geldiyse) işlemi uygula.
+    }
     
     // Puan cezası ve kelimeyi geçme
     scores[currentPlayer] -= scoreTimeout; 
-    progress[currentPlayer]++;
-    revealedCounts[currentPlayer] = 1;
-
-    // Oyun bitti mi?
-    if (progress[currentPlayer] >= totalWords) {
-        finishGame();
-        return;
+    
+    // Kelimeyi geçme (User request: Timer dolunca kelime atlanmasın, sadece sıra geçsin)
+    // progress[currentPlayer]++; 
+    
+    if (isHintEnabled) {
+        revealedCounts[currentPlayer]++;
     }
 
     if (gameMode === 'pvc') {
-        messageEl.innerText = `Süre doldu! -${scoreTimeout} Puan. Kelime açıldı.`;
+        messageEl.innerText = `Süre doldu! -${scoreTimeout} Puan.`;
         messageEl.className = "message error";
         guessInput.value = '';
         updatePlayerUI();
         renderBoard();
         startTimer();
     } else {
-        messageEl.innerText = `Süre doldu! -${scoreTimeout} Puan. Kelime açıldı, sıra geçti.`;
+        let msg = `Süre doldu! -${scoreTimeout} Puan. Sıra geçti.`;
+        if (gameMode === 'online') {
+            if (isRemote) {
+                msg = `Rakibin süresi doldu! -${scoreTimeout} Puan. Sıra sende.`;
+            } else {
+                msg = `Süren doldu! -${scoreTimeout} Puan. Sıra rakipte.`;
+            }
+        }
+        messageEl.innerText = msg;
         messageEl.className = "message error";
         guessInput.value = '';
         switchTurn();

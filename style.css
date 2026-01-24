@@ -472,3 +472,13 @@ body.dark-mode .chat-message.remote {
     background-color: #4b5563;
     color: white;
 }
+
+body.dark-mode .timer-badge {
+    background-color: #374151;
+    color: var(--text-main);
+}
+
+body.dark-mode .timer-badge.warning {
+    background-color: var(--error);
+    color: white;
+}
