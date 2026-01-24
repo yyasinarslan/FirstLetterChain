@@ -153,10 +153,15 @@
             <p id="message" class="message"></p>
             
             <button id="restart-btn" class="secondary-btn hidden">Yeni Oyun Kur</button>
+        </div>
 
-            <!-- Chat Section (Only Online) -->
-            <div id="chat-container" class="chat-box hidden">
-                <h3 style="margin: 0 0 10px 0; font-size: 1rem;">💬 Sohbet</h3>
+        <!-- Chat Section (Only Online) - Moved outside game-screen -->
+        <div id="chat-container" class="card hidden" style="margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 1rem;">💬 Sohbet</h3>
+                <button id="chat-toggle-btn" class="secondary-btn" style="width: auto; padding: 2px 10px; margin: 0; font-size: 0.8rem; line-height: 1;">−</button>
+            </div>
+            <div id="chat-content">
                 <div id="chat-messages" class="chat-messages"></div>
                 <div id="chat-typing-indicator" class="typing-indicator hidden">
                     <span></span><span></span><span></span>

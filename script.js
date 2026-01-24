@@ -29,6 +29,8 @@ const passBtn = document.getElementById('pass-btn');
 const messageEl = document.getElementById('message');
 const restartBtn = document.getElementById('restart-btn');
 const chatContainer = document.getElementById('chat-container');
+const chatContent = document.getElementById('chat-content');
+const chatToggleBtn = document.getElementById('chat-toggle-btn');
 const chatMessages = document.getElementById('chat-messages');
 const chatInput = document.getElementById('chat-input');
 const chatSendBtn = document.getElementById('chat-send-btn');
@@ -160,6 +162,12 @@ function init() {
         });
         chatInput.addEventListener('input', handleChatTyping);
     }
+    if(chatToggleBtn) {
+        chatToggleBtn.addEventListener('click', () => {
+            chatContent.classList.toggle('hidden');
+            chatToggleBtn.innerText = chatContent.classList.contains('hidden') ? '+' : '−';
+        });
+    }
 }
 
 // Oyun Modu Seçimi ve Başlatma
@@ -171,6 +179,7 @@ function initGame(mode) {
     // İsim ekranını sıfırla ve moda göre ayarla
     p1NameInput.value = '';
     p2NameInput.value = '';
+    chatContainer.classList.add('hidden'); // Chat'i gizle
 
     if (mode === 'pvc' || mode === 'online') {
         p2NameInputGroup.classList.add('hidden');
@@ -394,6 +403,13 @@ function startOnlineSetup() {
     onlineLobbyScreen.classList.add('hidden');
     setupScreen.classList.remove('hidden');
     gameScreen.classList.add('hidden');
+    
+    // Chat Görünürlüğü (Kurulum ekranında da görünsün)
+    if (gameMode === 'online' && isChatEnabled) {
+        chatContainer.classList.remove('hidden');
+        chatMessages.innerHTML = ''; // Yeni oyun, mesajları temizle
+    }
+    
     createSetupInputs();
     
     // Zincirleri sıfırla
@@ -533,12 +549,9 @@ function startGameplay() {
     scores = { 1: 0, 2: 0 };
     passesUsed = { 1: 0, 2: 0 };
 
-    // Chat Görünürlüğü
+    // Chat Görünürlüğü (Zaten açıksa dokunma, kapalıysa ve ayar açıksa aç)
     if (gameMode === 'online' && isChatEnabled) {
         chatContainer.classList.remove('hidden');
-        chatMessages.innerHTML = ''; // Önceki mesajları temizle
-    } else {
-        chatContainer.classList.add('hidden');
     }
     
     // Arayüz Ayarları
