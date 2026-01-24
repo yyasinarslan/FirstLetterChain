@@ -295,7 +295,21 @@ function handleRemoteData(data) {
         // Host: Misafir ismini aldı, oyunu başlatıyor
         p2Name = data.name; // Misafirin ismi P2 olur
         // Kurulumu başlat
-        conn.send({ type: 'SETUP_INIT', p1Name: p1Name });
+        conn.send({ 
+            type: 'SETUP_INIT', 
+            p1Name: p1Name,
+            settings: {
+                totalWords,
+                scoreCorrect,
+                scoreWrong,
+                scoreTimeout,
+                scorePass,
+                passLimit,
+                isHintEnabled,
+                isTimerEnabled,
+                timerDuration
+            }
+        });
         startOnlineSetup();
         
     } else if (data.type === 'SETUP_INIT') {
@@ -304,6 +318,20 @@ function handleRemoteData(data) {
         // Bunu p2Name'e alalım, çünkü p1Name Host olacak.
         p2Name = p1Name;
         p1Name = data.p1Name;
+        
+        // Host ayarlarını uygula (Senkronizasyon)
+        if (data.settings) {
+            totalWords = data.settings.totalWords;
+            scoreCorrect = data.settings.scoreCorrect;
+            scoreWrong = data.settings.scoreWrong;
+            scoreTimeout = data.settings.scoreTimeout;
+            scorePass = data.settings.scorePass;
+            passLimit = data.settings.passLimit;
+            isHintEnabled = data.settings.isHintEnabled;
+            isTimerEnabled = data.settings.isTimerEnabled;
+            timerDuration = data.settings.timerDuration;
+        }
+        
         startOnlineSetup();
 
     } else if (data.type === 'SETUP_DONE') {
