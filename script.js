@@ -32,6 +32,7 @@ const chatContainer = document.getElementById('chat-container');
 const chatMessages = document.getElementById('chat-messages');
 const chatInput = document.getElementById('chat-input');
 const chatSendBtn = document.getElementById('chat-send-btn');
+const chatTypingIndicator = document.getElementById('chat-typing-indicator');
 const p1Card = document.getElementById('p1-card');
 const p2Card = document.getElementById('p2-card');
 const p1ScoreEl = document.getElementById('p1-score');
@@ -44,6 +45,7 @@ const hintToggle = document.getElementById('hint-toggle');
 const btnSettings = document.getElementById('btn-settings');
 const btnSettingsBack = document.getElementById('btn-settings-back');
 const timerToggle = document.getElementById('timer-toggle');
+const chatToggle = document.getElementById('chat-toggle');
 const timerDurationInput = document.getElementById('timer-duration');
 const timerSettingsDetail = document.getElementById('timer-settings-detail');
 const timerBox = document.getElementById('timer-box');
@@ -75,6 +77,7 @@ let currentPlayer = 1; // 1 veya 2
 let scores = { 1: 0, 2: 0 };
 let setupStep = 1; // PvP kurulum aşaması (1: P1 giriyor, 2: P2 giriyor)
 let isHintEnabled = true; // Ayar: Yanlış tahminde ipucu verilsin mi?
+let isChatEnabled = true; // Ayar: Sohbet açık mı?
 let isTimerEnabled = false;
 let timerDuration = 30;
 let currentTime = 0;
@@ -155,6 +158,7 @@ function init() {
         chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') sendChatMessage();
         });
+        chatInput.addEventListener('input', handleChatTyping);
     }
 }
 
@@ -187,6 +191,7 @@ function initGame(mode) {
 function handleNameSubmit() {
     // Ayarları Oku
     isHintEnabled = hintToggle.checked; // Ayarı oku
+    isChatEnabled = chatToggle.checked;
     isTimerEnabled = timerToggle.checked;
     timerDuration = parseInt(timerDurationInput.value) || 30;
     scoreCorrect = parseInt(scoreCorrectInput.value) || 10;
@@ -330,6 +335,7 @@ function handleRemoteData(data) {
                 scorePass,
                 passLimit,
                 isHintEnabled,
+                isChatEnabled,
                 isTimerEnabled,
                 timerDuration
             }
@@ -352,6 +358,7 @@ function handleRemoteData(data) {
             scorePass = data.settings.scorePass;
             passLimit = data.settings.passLimit;
             isHintEnabled = data.settings.isHintEnabled;
+            isChatEnabled = data.settings.isChatEnabled;
             isTimerEnabled = data.settings.isTimerEnabled;
             timerDuration = data.settings.timerDuration;
         }
@@ -377,6 +384,9 @@ function handleRemoteData(data) {
         
     } else if (data.type === 'CHAT') {
         appendChatMessage(data.message, false);
+        
+    } else if (data.type === 'TYPING') {
+        showTypingIndicator();
     }
 }
 
@@ -523,7 +533,7 @@ function startGameplay() {
     passesUsed = { 1: 0, 2: 0 };
 
     // Chat Görünürlüğü
-    if (gameMode === 'online') {
+    if (gameMode === 'online' && isChatEnabled) {
         chatContainer.classList.remove('hidden');
         chatMessages.innerHTML = ''; // Önceki mesajları temizle
     } else {
@@ -881,6 +891,30 @@ function appendChatMessage(text, isSelf) {
     msgDiv.innerText = text;
     chatMessages.appendChild(msgDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight; // En alta kaydır
+}
+
+let typingTimeout = null;
+function handleChatTyping() {
+    if (gameMode !== 'online' || !conn) return;
+    
+    // Çok sık göndermemek için basit bir kontrol (Throttle)
+    if (!typingTimeout) {
+        conn.send({ type: 'TYPING' });
+        typingTimeout = setTimeout(() => {
+            typingTimeout = null;
+        }, 1500);
+    }
+}
+
+let hideTypingTimeout = null;
+function showTypingIndicator() {
+    chatTypingIndicator.classList.remove('hidden');
+    
+    if (hideTypingTimeout) clearTimeout(hideTypingTimeout);
+    
+    hideTypingTimeout = setTimeout(() => {
+        chatTypingIndicator.classList.add('hidden');
+    }, 2000);
 }
 
 // --- Timer Fonksiyonları ---

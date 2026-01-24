@@ -68,6 +68,10 @@
                     <span>Karanlık Mod</span>
                 </label>
                 <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem; margin-top: 10px;">
+                    <input type="checkbox" id="chat-toggle" checked>
+                    <span>Sohbet Özelliği Açık Olsun</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem; margin-top: 10px;">
                     <input type="checkbox" id="hint-toggle" checked>
                     <span>Yanlış tahminde ipucu açılsın (+1 harf)</span>
                 </label>
@@ -154,6 +158,9 @@
             <div id="chat-container" class="chat-box hidden">
                 <h3 style="margin: 0 0 10px 0; font-size: 1rem;">💬 Sohbet</h3>
                 <div id="chat-messages" class="chat-messages"></div>
+                <div id="chat-typing-indicator" class="typing-indicator hidden">
+                    <span></span><span></span><span></span>
+                </div>
                 <div class="chat-input-area">
                     <input type="text" id="chat-input" placeholder="Mesaj yaz..." autocomplete="off">
                     <button id="chat-send-btn" class="secondary-btn" style="width: auto; margin-top: 0;">Gönder</button>
