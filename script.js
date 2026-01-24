@@ -29,6 +29,8 @@ const boardArea2 = document.getElementById('board-area-2');
 const guessInput = document.getElementById('guess-input');
 const guessBtn = document.getElementById('guess-btn');
 const passBtn = document.getElementById('pass-btn');
+const wrongGuessesContainer = document.getElementById('wrong-guesses-container');
+const wrongGuessesList = document.getElementById('wrong-guesses-list');
 const messageEl = document.getElementById('message');
 const restartBtn = document.getElementById('restart-btn');
 const chatContainer = document.getElementById('chat-container');
@@ -93,11 +95,12 @@ let scoreTimeout = 5;
 let scorePass = 20;
 let passLimit = 1;
 let passesUsed = { 1: 0, 2: 0 };
+let wrongGuesses = { 1: [], 2: [] };
 const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
-const GAME_VERSION = "v2.0";
+const GAME_VERSION = "v3.0";
 function init() {
     console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
@@ -561,6 +564,7 @@ function startGameplay() {
     currentPlayer = 1;
     scores = { 1: 0, 2: 0 };
     passesUsed = { 1: 0, 2: 0 };
+    wrongGuesses = { 1: [], 2: [] };
 
     // Chat Görünürlüğü (Zaten açıksa dokunma, kapalıysa ve ayar açıksa aç)
     if (gameMode === 'online' && isChatEnabled) {
@@ -674,6 +678,7 @@ function handleGuess(isRemote = false) {
         // İlerlemeyi artır
         progress[currentPlayer]++;
         revealedCounts[currentPlayer] = 1; // Yeni kelimeye geçince ipucunu sıfırla
+        wrongGuesses[currentPlayer] = []; // Yeni kelimeye geçince yanlış tahminleri sıfırla
         
         // Oyun Bitti mi?
         if (progress[currentPlayer] >= totalWords) {
@@ -699,6 +704,11 @@ function handleGuess(isRemote = false) {
         scores[currentPlayer] -= scoreWrong;
         messageEl.innerText = `Yanlış! (-${scoreWrong} Puan)`;
         messageEl.className = "message error";
+        
+        if (!wrongGuesses[currentPlayer].includes(userGuess)) {
+            wrongGuesses[currentPlayer].push(userGuess);
+        }
+
         guessInput.classList.add('shake');
         setTimeout(() => guessInput.classList.remove('shake'), 500);
         
@@ -748,6 +758,7 @@ function handlePass(isRemote = false) {
 
         progress[currentPlayer]++;
         revealedCounts[currentPlayer] = 1;
+        wrongGuesses[currentPlayer] = []; // Pas geçince yanlış tahminleri sıfırla
 
         if (progress[currentPlayer] >= totalWords) {
             finishGame();
@@ -764,6 +775,7 @@ function handlePass(isRemote = false) {
         scores[currentPlayer] -= scorePass;
         progress[currentPlayer]++;
         revealedCounts[currentPlayer] = 1;
+        wrongGuesses[currentPlayer] = []; // Pas geçince yanlış tahminleri sıfırla
 
         if (progress[currentPlayer] >= totalWords) {
             finishGame();
@@ -800,6 +812,15 @@ function updatePlayerUI() {
     // Pas Butonu Metni ve Durumu
     const remainingPass = Math.max(0, passLimit - passesUsed[currentPlayer]);
     passBtn.innerText = `Pas Geç (${remainingPass})`;
+
+    // Yanlış Tahminleri Göster
+    const currentWrongGuesses = wrongGuesses[currentPlayer];
+    if (currentWrongGuesses && currentWrongGuesses.length > 0) {
+        wrongGuessesContainer.classList.remove('hidden');
+        wrongGuessesList.innerText = currentWrongGuesses.join(', ');
+    } else {
+        wrongGuessesContainer.classList.add('hidden');
+    }
 
     // Online Modda Input Kilitleme
     if (gameMode === 'online') {
@@ -881,6 +902,7 @@ function performRestart() {
     revealedCounts = { 1: 1, 2: 1 };
     currentPlayer = 1;
     passesUsed = { 1: 0, 2: 0 };
+    wrongGuesses = { 1: [], 2: [] };
     
     // Bitiş ekranı elemanlarını gizle/aktif et
     restartBtn.classList.add('hidden');
