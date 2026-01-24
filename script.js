@@ -358,7 +358,7 @@ function handleRemoteData(data) {
             scorePass = data.settings.scorePass;
             passLimit = data.settings.passLimit;
             isHintEnabled = data.settings.isHintEnabled;
-            isChatEnabled = data.settings.isChatEnabled;
+            isChatEnabled = (data.settings.isChatEnabled !== undefined) ? data.settings.isChatEnabled : true;
             isTimerEnabled = data.settings.isTimerEnabled;
             timerDuration = data.settings.timerDuration;
         }
@@ -393,6 +393,7 @@ function handleRemoteData(data) {
 function startOnlineSetup() {
     onlineLobbyScreen.classList.add('hidden');
     setupScreen.classList.remove('hidden');
+    gameScreen.classList.add('hidden');
     createSetupInputs();
     
     // Zincirleri sıfırla
