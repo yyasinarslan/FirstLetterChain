@@ -317,6 +317,52 @@ input[type="text"]:focus {
     40% { transform: scale(1); }
 }
 
+/* --- Responsive Layout (Game & Chat) --- */
+.game-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Geniş Ekranlar (Desktop/Laptop) */
+@media (min-width: 900px) {
+    .container {
+        max-width: 1100px; /* Container genişliğini artır */
+    }
+
+    /* Menü ekranlarını dar tut ve ortala */
+    #menu-screen,
+    #name-entry-screen,
+    #online-lobby-screen,
+    #settings-screen {
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .game-content-wrapper {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    /* Oyun ve Kurulum Alanı (Sol Taraf) */
+    #setup-screen, #game-screen {
+        flex: 2;
+        width: 100%;
+    }
+
+    /* Sohbet Alanı (Sağ Taraf) */
+    #chat-container {
+        flex: 1;
+        position: sticky;
+        top: 20px; /* Scroll yaparken sabit kalsın */
+    }
+
+    .chat-messages {
+        height: 400px; /* Geniş ekranda daha uzun sohbet geçmişi */
+    }
+}
+
 /* --- Responsive & Mobile Düzenlemeleri --- */
 
 /* Küçük Laptoplar ve Tabletler için */
