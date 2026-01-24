@@ -94,8 +94,9 @@ const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
+const GAME_VERSION = "v0.1.0";
 function init() {
-    console.log("Oyun başlatılıyor...");
+    console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
     // Enter tuşu ile tahmin yapabilme
     if (guessInput) {
@@ -167,6 +168,12 @@ function init() {
             chatContent.classList.toggle('hidden');
             chatToggleBtn.innerText = chatContent.classList.contains('hidden') ? '+' : '−';
         });
+    }
+
+    // Ayarlar ekranına versiyon bilgisini yaz
+    const settingsVersionText = document.getElementById('settings-version-text');
+    if (settingsVersionText) {
+        settingsVersionText.innerText = `Oyun Sürümü: ${GAME_VERSION}`;
     }
 }
 
