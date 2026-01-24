@@ -83,52 +83,66 @@ const TOTAL_WORDS = 7;
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
 function init() {
+    console.log("Oyun başlatılıyor...");
+
     // Enter tuşu ile tahmin yapabilme
-    guessInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') handleGuess();
-    });
+    if (guessInput) {
+        guessInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleGuess();
+        });
+    }
 
     // Dark Mode Başlangıç Kontrolü
-    if (localStorage.getItem('darkMode') === 'true') {
-        document.body.classList.add('dark-mode');
-        if(darkModeToggle) darkModeToggle.checked = true;
+    try {
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            if(darkModeToggle) darkModeToggle.checked = true;
+        }
+    } catch (e) {
+        console.warn("LocalStorage erişimi kısıtlı:", e);
     }
 
     if(darkModeToggle) {
         darkModeToggle.addEventListener('change', () => {
             document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', darkModeToggle.checked);
+            try { localStorage.setItem('darkMode', darkModeToggle.checked); } catch(e) {}
         });
     }
 
-    btnPvC.addEventListener('click', () => initGame('pvc'));
-    btnPvP.addEventListener('click', () => initGame('pvp'));
-    btnOnline.addEventListener('click', () => initGame('online'));
+    if(btnPvC) btnPvC.addEventListener('click', () => initGame('pvc'));
+    if(btnPvP) btnPvP.addEventListener('click', () => initGame('pvp'));
+    if(btnOnline) btnOnline.addEventListener('click', () => initGame('online'));
 
     // Ayarlar Menüsü Geçişleri
-    btnSettings.addEventListener('click', () => {
-        menuScreen.classList.add('hidden');
-        settingsScreen.classList.remove('hidden');
-    });
-    btnSettingsBack.addEventListener('click', () => {
-        settingsScreen.classList.add('hidden');
-        menuScreen.classList.remove('hidden');
-    });
+    if(btnSettings) {
+        btnSettings.addEventListener('click', () => {
+            menuScreen.classList.add('hidden');
+            settingsScreen.classList.remove('hidden');
+        });
+    }
+    if(btnSettingsBack) {
+        btnSettingsBack.addEventListener('click', () => {
+            settingsScreen.classList.add('hidden');
+            menuScreen.classList.remove('hidden');
+        });
+    }
 
     // Timer Ayarı Görünürlüğü
-    timerToggle.addEventListener('change', () => {
-        if(timerToggle.checked) timerSettingsDetail.classList.remove('hidden');
-        else timerSettingsDetail.classList.add('hidden');
-    });
+    if(timerToggle) {
+        timerToggle.addEventListener('change', () => {
+            if(timerToggle.checked) timerSettingsDetail.classList.remove('hidden');
+            else timerSettingsDetail.classList.add('hidden');
+        });
+    }
     
-    setupActionBtn.addEventListener('click', handleSetupAction);
-    setupRandomBtn.addEventListener('click', fillRandomSetup);
-    nameSubmitBtn.addEventListener('click', handleNameSubmit);
-    btnCreateRoom.addEventListener('click', createRoom);
-    btnJoinRoom.addEventListener('click', joinRoom);
-    guessBtn.addEventListener('click', handleGuess);
-    passBtn.addEventListener('click', handlePass);
-    restartBtn.addEventListener('click', resetGame);
+    if(setupActionBtn) setupActionBtn.addEventListener('click', handleSetupAction);
+    if(setupRandomBtn) setupRandomBtn.addEventListener('click', fillRandomSetup);
+    if(nameSubmitBtn) nameSubmitBtn.addEventListener('click', handleNameSubmit);
+    if(btnCreateRoom) btnCreateRoom.addEventListener('click', createRoom);
+    if(btnJoinRoom) btnJoinRoom.addEventListener('click', joinRoom);
+    if(guessBtn) guessBtn.addEventListener('click', handleGuess);
+    if(passBtn) passBtn.addEventListener('click', handlePass);
+    if(restartBtn) restartBtn.addEventListener('click', resetGame);
 }
 
 // Oyun Modu Seçimi ve Başlatma
@@ -210,6 +224,12 @@ function handleNameSubmit() {
 // --- ONLINE MANTIK ---
 function initOnlineLobby() {
     onlineLobbyScreen.classList.remove('hidden');
+    
+    if (typeof Peer === 'undefined') {
+        alert("PeerJS kütüphanesi yüklenemedi. Lütfen reklam engelleyiciyi kapatın veya sayfayı yenileyin.");
+        return;
+    }
+
     // PeerJS Başlat
     peer = new Peer(null, { debug: 2 });
     
