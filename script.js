@@ -88,13 +88,13 @@ let scoreCorrect = 10;
 let scoreWrong = 3;
 let scoreTimeout = 5;
 let scorePass = 20;
-let passLimit = 2;
+let passLimit = 1;
 let passesUsed = { 1: 0, 2: 0 };
 const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
-const GAME_VERSION = "v0.2.0";
+const GAME_VERSION = "v0.2.1";
 function init() {
     console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
@@ -758,6 +758,7 @@ function handlePass(isRemote = false) {
         guessInput.value = '';
         renderBoard();
         startTimer();
+        updatePlayerUI();
     } else {
         // PvP: Sırayı devret
         // Pas geçildiğinde puan düş, kelimeyi atla ve sırayı devret
