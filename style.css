@@ -157,6 +157,29 @@ input[type="text"]:focus {
     color: var(--text-main); 
 }
 
+.game-boards-container {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.board-area {
+    flex: 1;
+    background: #f9fafb;
+    padding: 10px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    opacity: 0.6;
+    transition: all 0.3s;
+}
+
+.board-area.active {
+    background: var(--card-bg);
+    border-color: var(--primary);
+    opacity: 1;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
 .chain-container {
     display: flex;
     flex-direction: column;
@@ -446,6 +469,10 @@ body.dark-mode .player-card.active {
     background-color: #312e81;
 }
 
+body.dark-mode .board-area {
+    background-color: #374151;
+}
+
 body.dark-mode .secondary-btn {
     background-color: #374151;
     color: white;
@@ -481,4 +508,11 @@ body.dark-mode .timer-badge {
 body.dark-mode .timer-badge.warning {
     background-color: var(--error);
     color: white;
+}
+
+/* Mobilde boardlar alt alta */
+@media (max-width: 600px) {
+    .game-boards-container {
+        flex-direction: column;
+    }
 }

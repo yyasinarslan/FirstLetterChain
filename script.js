@@ -22,7 +22,10 @@ const setupTitle = document.getElementById('setup-title');
 const setupDesc = document.getElementById('setup-desc');
 const setupActionBtn = document.getElementById('setup-action-btn');
 const setupRandomBtn = document.getElementById('setup-random-btn');
-const wordChainContainer = document.getElementById('word-chain');
+const chain1El = document.getElementById('chain-1');
+const chain2El = document.getElementById('chain-2');
+const boardArea1 = document.getElementById('board-area-1');
+const boardArea2 = document.getElementById('board-area-2');
 const guessInput = document.getElementById('guess-input');
 const guessBtn = document.getElementById('guess-btn');
 const passBtn = document.getElementById('pass-btn');
@@ -94,7 +97,7 @@ const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
-const GAME_VERSION = "v1.4";
+const GAME_VERSION = "v2.0";
 function init() {
     console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
@@ -567,10 +570,12 @@ function startGameplay() {
     // Arayüz Ayarları
     if (gameMode === 'pvc') {
         p2Card.classList.add('hidden'); // Bilgisayar kartını gizle veya "Bilgisayar" yap
+        boardArea2.classList.add('hidden');
         p1Card.querySelector('.p-name').innerText = p1Name;
         turnIndicator.innerText = "Bilgisayara Karşı Oynuyorsun";
     } else {
         p2Card.classList.remove('hidden');
+        boardArea2.classList.remove('hidden');
         p1Card.querySelector('.p-name').innerText = p1Name;
         p2Card.querySelector('.p-name').innerText = p2Name;
     }
@@ -583,31 +588,22 @@ function startGameplay() {
 
 // Oyun Tahtasını Çiz
 function renderBoard() {
-    wordChainContainer.innerHTML = '';
+    // 1. Oyuncunun Ekranı (P2'nin hazırladığı veya Bilgisayarın zinciri)
+    let chain1Target = (gameMode === 'pvc') ? computerChain : p2Chain;
+    renderSingleChain(chain1El, chain1Target, progress[1], revealedCounts[1], (currentPlayer === 1));
 
-    // Hangi zinciri göstereceğiz?
-    // PvP'de: 1. Oyuncu sırasındaysa, 2. Oyuncunun hazırladığı zinciri (p2Chain) görmeli.
-    // PvC'de: Computer zinciri.
-    let targetChain = [];
-    let currentProg = 0;
-
-    if (gameMode === 'pvc') {
-        targetChain = computerChain;
-        currentProg = progress[1];
-    } else {
-        // PvP Mantığı:
-        // P1 oynuyorsa -> Hedef p2Chain
-        // P2 oynuyorsa -> Hedef p1Chain
-        if (currentPlayer === 1) {
-            targetChain = p2Chain;
-            currentProg = progress[1];
-        } else {
-            targetChain = p1Chain;
-            currentProg = progress[2];
-        }
+    // 2. Oyuncunun Ekranı (P1'in hazırladığı zincir) - Sadece PvP/Online
+    if (gameMode === 'pvp' || gameMode === 'online') {
+        renderSingleChain(chain2El, p1Chain, progress[2], revealedCounts[2], (currentPlayer === 2));
     }
+}
 
-    targetChain.forEach((word, index) => {
+function renderSingleChain(container, chain, currentProg, revealedCount, isActive) {
+    container.innerHTML = '';
+    
+    if (!chain) return;
+
+    chain.forEach((word, index) => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'word-item';
 
@@ -625,7 +621,7 @@ function renderBoard() {
             // Henüz bilinmemiş (Maskeli)
             let showCount = 1;
             
-            if (index === currentProg) {
+            if (index === currentProg && isActive) {
                 itemDiv.classList.add('active');
                 // Sıra kimdeyse onun ipucu seviyesini kullan
                 showCount = revealedCounts[currentPlayer];
@@ -640,7 +636,7 @@ function renderBoard() {
 
         itemDiv.appendChild(indexSpan);
         itemDiv.appendChild(textSpan);
-        wordChainContainer.appendChild(itemDiv);
+        container.appendChild(itemDiv);
     });
 }
 
@@ -828,12 +824,16 @@ function updatePlayerUI() {
     if (currentPlayer === 1) {
         p1Card.classList.add('active');
         p2Card.classList.remove('active');
+        boardArea1.classList.add('active');
+        boardArea2.classList.remove('active');
         guessInput.placeholder = `${p1Name} tahmini...`;
         turnIndicator.innerText = `Sıra: ${p1Name} (${p2Name} kelimelerini çözüyor)`;
         turnIndicator.style.color = "#4f46e5";
     } else {
         p1Card.classList.remove('active');
         p2Card.classList.add('active');
+        boardArea1.classList.remove('active');
+        boardArea2.classList.add('active');
         guessInput.placeholder = `${p2Name} tahmini...`;
         turnIndicator.innerText = `Sıra: ${p2Name} (${p1Name} kelimelerini çözüyor)`;
         turnIndicator.style.color = "#ef4444";
