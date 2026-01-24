@@ -55,6 +55,13 @@ header h1 {
     transition: all 0.3s ease;
 }
 
+.card h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    color: var(--text-main);
+}
+
 .hidden {
     display: none !important;
 }
@@ -76,8 +83,9 @@ header h1 {
 /* Setup Screen Styles */
 .input-grid {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 input[type="text"] {

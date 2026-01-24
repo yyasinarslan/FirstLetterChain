@@ -4,6 +4,12 @@
 
 // --- DOM Elementleri ---
 const menuScreen = document.getElementById('menu-screen');
+const nameEntryScreen = document.getElementById('name-entry-screen');
+const p1NameInput = document.getElementById('p1-name-input');
+const p2NameInput = document.getElementById('p2-name-input');
+const p2NameInputGroup = document.getElementById('p2-name-input-group');
+const p1NameLabel = document.getElementById('p1-name-label');
+const nameSubmitBtn = document.getElementById('name-submit-btn');
 const settingsScreen = document.getElementById('settings-screen');
 const setupScreen = document.getElementById('setup-screen');
 const gameScreen = document.getElementById('game-screen');
@@ -42,6 +48,8 @@ let gameMode = 'pvc'; // 'pvc' (Player vs Computer) veya 'pvp' (Player vs Player
 let p1Chain = []; // 1. Oyuncunun hazırladığı (2. Oyuncunun tahmin edeceği)
 let p2Chain = []; // 2. Oyuncunun hazırladığı (1. Oyuncunun tahmin edeceği)
 let computerChain = []; // Bilgisayar modu için
+let p1Name = "";
+let p2Name = "";
 
 // İlerleme Durumları (Hangi kelimedeler)
 let progress = { 1: 1, 2: 1 }; 
@@ -101,6 +109,7 @@ function init() {
     
     setupActionBtn.addEventListener('click', handleSetupAction);
     setupRandomBtn.addEventListener('click', fillRandomSetup);
+    nameSubmitBtn.addEventListener('click', handleNameSubmit);
     guessBtn.addEventListener('click', handleGuess);
     restartBtn.addEventListener('click', resetGame);
 }
@@ -109,6 +118,26 @@ function init() {
 function initGame(mode) {
     gameMode = mode;
     menuScreen.classList.add('hidden');
+    nameEntryScreen.classList.remove('hidden');
+
+    // İsim ekranını sıfırla ve moda göre ayarla
+    p1NameInput.value = '';
+    p2NameInput.value = '';
+
+    if (mode === 'pvc') {
+        p2NameInputGroup.classList.add('hidden');
+        p1NameLabel.innerText = "Oyuncu Adı";
+        p1NameInput.placeholder = "Adınızı giriniz...";
+    } else {
+        p2NameInputGroup.classList.remove('hidden');
+        p1NameLabel.innerText = "1. Oyuncu Adı";
+        p1NameInput.placeholder = "1. Oyuncu ismi...";
+        p2NameInput.placeholder = "2. Oyuncu ismi...";
+    }
+}
+
+function handleNameSubmit() {
+    // Ayarları Oku
     isHintEnabled = hintToggle.checked; // Ayarı oku
     isTimerEnabled = timerToggle.checked;
     timerDuration = parseInt(timerDurationInput.value) || 30;
@@ -117,7 +146,13 @@ function initGame(mode) {
     scoreTimeout = parseInt(scoreTimeoutInput.value) || 5;
     totalWords = parseInt(wordCountInput.value) || 7;
 
-    if (mode === 'pvc') {
+    // İsimleri Kaydet
+    p1Name = p1NameInput.value.trim() || (gameMode === 'pvc' ? 'Oyuncu' : '1. Oyuncu');
+    p2Name = p2NameInput.value.trim() || '2. Oyuncu';
+
+    nameEntryScreen.classList.add('hidden');
+
+    if (gameMode === 'pvc') {
         // Bilgisayar Modu: Rastgele liste seç ve başlat
         
         // Seçilen kelime sayısına (totalWords) uygun olan listeleri filtrele
@@ -162,13 +197,13 @@ function updateSetupUI() {
     inputs.forEach(input => input.value = ''); // Temizle
 
     if (setupStep === 1) {
-        setupTitle.innerText = "1. Oyuncu Hazırlığı";
-        setupDesc.innerText = "2. Oyuncu ekrana bakmasın! 2. Oyuncunun tahmin edeceği kelimeleri gir.";
-        setupActionBtn.innerText = "Devam Et (Sıra 2. Oyuncuda)";
+        setupTitle.innerText = `${p1Name} Hazırlığı`;
+        setupDesc.innerText = `${p2Name} ekrana bakmasın! ${p2Name} tahmin edecek.`;
+        setupActionBtn.innerText = `Devam Et (Sıra ${p2Name} geçecek)`;
         setupTitle.style.color = "#4f46e5";
     } else {
-        setupTitle.innerText = "2. Oyuncu Hazırlığı";
-        setupDesc.innerText = "1. Oyuncu ekrana bakmasın! 1. Oyuncunun tahmin edeceği kelimeleri gir.";
+        setupTitle.innerText = `${p2Name} Hazırlığı`;
+        setupDesc.innerText = `${p1Name} ekrana bakmasın! ${p1Name} tahmin edecek.`;
         setupActionBtn.innerText = "Oyunu Başlat";
         setupTitle.style.color = "#ef4444"; // Farklı renk
     }
@@ -234,12 +269,12 @@ function startGameplay() {
     // Arayüz Ayarları
     if (gameMode === 'pvc') {
         p2Card.classList.add('hidden'); // Bilgisayar kartını gizle veya "Bilgisayar" yap
-        p1Card.querySelector('.p-name').innerText = "Oyuncu";
+        p1Card.querySelector('.p-name').innerText = p1Name;
         turnIndicator.innerText = "Bilgisayara Karşı Oynuyorsun";
     } else {
         p2Card.classList.remove('hidden');
-        p1Card.querySelector('.p-name').innerText = "1. Oyuncu";
-        p2Card.querySelector('.p-name').innerText = "2. Oyuncu";
+        p1Card.querySelector('.p-name').innerText = p1Name;
+        p2Card.querySelector('.p-name').innerText = p2Name;
     }
     
     updatePlayerUI();
@@ -400,14 +435,14 @@ function updatePlayerUI() {
     if (currentPlayer === 1) {
         p1Card.classList.add('active');
         p2Card.classList.remove('active');
-        guessInput.placeholder = "1. Oyuncu tahmini...";
-        turnIndicator.innerText = "Sıra: 1. Oyuncu (2. Oyuncunun kelimelerini çözüyor)";
+        guessInput.placeholder = `${p1Name} tahmini...`;
+        turnIndicator.innerText = `Sıra: ${p1Name} (${p2Name} kelimelerini çözüyor)`;
         turnIndicator.style.color = "#4f46e5";
     } else {
         p1Card.classList.remove('active');
         p2Card.classList.add('active');
-        guessInput.placeholder = "2. Oyuncu tahmini...";
-        turnIndicator.innerText = "Sıra: 2. Oyuncu (1. Oyuncunun kelimelerini çözüyor)";
+        guessInput.placeholder = `${p2Name} tahmini...`;
+        turnIndicator.innerText = `Sıra: ${p2Name} (${p1Name} kelimelerini çözüyor)`;
         turnIndicator.style.color = "#ef4444";
     }
 }
@@ -422,7 +457,7 @@ function finishGame(customMessage = null) {
         resultText = `Tebrikler! Zinciri tamamladın. Puanın: ${scores[1]} 🏆`;
     } else {
         // PvP Bitiş
-        const winner = scores[1] > scores[2] ? "1. Oyuncu" : (scores[2] > scores[1] ? "2. Oyuncu" : "Dostluk");
+        const winner = scores[1] > scores[2] ? p1Name : (scores[2] > scores[1] ? p2Name : "Dostluk");
         resultText = `Oyun Bitti! Kazanan: ${winner} 🏆`;
     }
     
