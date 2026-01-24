@@ -100,7 +100,7 @@ const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
-const GAME_VERSION = "v4.3";
+const GAME_VERSION = "v4.4";
 function init() {
     console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
@@ -512,9 +512,17 @@ function fillRandomSetup() {
             const listSegment = list.slice(0, totalWords);
             return JSON.stringify(listSegment) !== JSON.stringify(chainToAvoid);
         });
-        // Eğer hiç liste kalmadıysa (çok az seçenek varsa), filtreyi yoksay
-        if (validLists.length === 0) validLists = computerLists.filter(list => list.length >= totalWords);
+    } else if (gameMode === 'online') {
+        // KÖR SEÇİM: Rakip henüz hazır değilse bile çakışmayı önlemek için havuzu bölüş.
+        // P1 çift indeksleri, P2 tek indeksleri alır. Kullanıcı fark etmez.
+        validLists = validLists.filter((_, index) => {
+            if (myPlayerId === 1) return index % 2 === 0;
+            return index % 2 !== 0;
+        });
     }
+
+    // Eğer hiç liste kalmadıysa (çok az seçenek varsa), filtreyi yoksay
+    if (validLists.length === 0) validLists = computerLists.filter(list => list.length >= totalWords);
 
     // Rastgele birini seç
     const randomList = validLists[Math.floor(Math.random() * validLists.length)];
@@ -545,15 +553,6 @@ function handleSetupAction() {
     }
 
     if (gameMode === 'online') {
-        // Çakışma Kontrolü: Eğer rakip bizden önce hazır olduysa, onun zincirini seçmemeliyiz
-        let opponentChain = (myPlayerId === 1) ? p2Chain : p1Chain;
-        if (opponentChain && opponentChain.length > 0) {
-            if (JSON.stringify(currentWords) === JSON.stringify(opponentChain)) {
-                alert("Rakibiniz de bu kelime zincirini seçmiş! Lütfen 'Rastgele Doldur' diyerek veya elle değiştirerek farklı bir zincir belirleyin.");
-                return;
-            }
-        }
-
         if (myPlayerId === 1) {
             p1Chain = currentWords; // Host kendi hazırladığını kaydetti
             conn.send({ type: 'SETUP_DONE', chain: p1Chain });
