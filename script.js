@@ -100,7 +100,7 @@ const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
-const GAME_VERSION = "v4.4";
+const GAME_VERSION = "v4.5";
 function init() {
     console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
@@ -168,11 +168,23 @@ function init() {
             if (e.key === 'Enter') sendChatMessage();
         });
         chatInput.addEventListener('input', handleChatTyping);
+        chatInput.addEventListener('focus', () => {
+            if(chatToggleBtn) chatToggleBtn.classList.remove('has-new-message');
+        });
+    }
+    if(chatContent) {
+        chatContent.addEventListener('click', () => {
+            if(chatToggleBtn) chatToggleBtn.classList.remove('has-new-message');
+        });
     }
     if(chatToggleBtn) {
         chatToggleBtn.addEventListener('click', () => {
             chatContent.classList.toggle('hidden');
-            chatToggleBtn.innerText = chatContent.classList.contains('hidden') ? '+' : '−';
+            const isHidden = chatContent.classList.contains('hidden');
+            chatToggleBtn.innerText = isHidden ? '+' : '−';
+            if (!isHidden) {
+                chatToggleBtn.classList.remove('has-new-message');
+            }
         });
     }
 
@@ -966,6 +978,11 @@ function appendChatMessage(text, isSelf) {
     msgDiv.innerText = text;
     chatMessages.appendChild(msgDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight; // En alta kaydır
+
+    // Bildirim: Eğer mesaj bizden değilse ve kullanıcı chat'e odaklanmamışsa butonu yak
+    if (!isSelf && document.activeElement !== chatInput) {
+        chatToggleBtn.classList.add('has-new-message');
+    }
 }
 
 let typingTimeout = null;

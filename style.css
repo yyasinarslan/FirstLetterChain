@@ -516,3 +516,10 @@ body.dark-mode .timer-badge.warning {
         flex-direction: column;
     }
 }
+
+.has-new-message {
+    background-color: var(--error) !important;
+    color: white !important;
+    animation: pulse 1s infinite;
+    border-color: var(--error) !important;
+}
