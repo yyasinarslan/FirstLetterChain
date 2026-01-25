@@ -101,7 +101,7 @@ const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
-const GAME_VERSION = "v4.6";
+const GAME_VERSION = "v4.7";
 function init() {
     console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
@@ -627,6 +627,7 @@ function startGameplay() {
     
     updatePlayerUI();
     renderBoard();
+    guessInput.value = '';
     guessInput.focus();
     startTimer();
 }
