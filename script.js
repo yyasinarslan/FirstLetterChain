@@ -31,6 +31,7 @@ const guessBtn = document.getElementById('guess-btn');
 const passBtn = document.getElementById('pass-btn');
 const wrongGuessesContainer = document.getElementById('wrong-guesses-container');
 const wrongGuessesList = document.getElementById('wrong-guesses-list');
+const notificationArea = document.getElementById('notification-area');
 const messageEl = document.getElementById('message');
 const restartBtn = document.getElementById('restart-btn');
 const chatContainer = document.getElementById('chat-container');
@@ -100,7 +101,7 @@ const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
-const GAME_VERSION = "v4.5";
+const GAME_VERSION = "v4.6";
 function init() {
     console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
@@ -982,6 +983,9 @@ function appendChatMessage(text, isSelf) {
     // Bildirim: Eğer mesaj bizden değilse ve kullanıcı chat'e odaklanmamışsa butonu yak
     if (!isSelf && document.activeElement !== chatInput) {
         chatToggleBtn.classList.add('has-new-message');
+        
+        // Pop-up (Toast) Bildirim Göster
+        showToast(`💬 Yeni Mesaj: ${text}`);
     }
 }
 
@@ -1007,6 +1011,34 @@ function showTypingIndicator() {
     hideTypingTimeout = setTimeout(() => {
         chatTypingIndicator.classList.add('hidden');
     }, 2000);
+}
+
+// --- Toast Bildirim Fonksiyonu ---
+function showToast(message) {
+    if (!notificationArea) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    // Uzun mesajları kısalt
+    const displayMsg = message.length > 50 ? message.substring(0, 50) + '...' : message;
+    toast.innerText = displayMsg;
+
+    // Tıklayınca sohbeti aç
+    toast.addEventListener('click', () => {
+        chatContent.classList.remove('hidden');
+        chatToggleBtn.innerText = '−';
+        chatToggleBtn.classList.remove('has-new-message');
+        chatInput.focus();
+        toast.remove();
+    });
+
+    notificationArea.appendChild(toast);
+
+    // 4 saniye sonra otomatik sil
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300); // Fade out bekle
+    }, 4000);
 }
 
 // --- Timer Fonksiyonları ---
