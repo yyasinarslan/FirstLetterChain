@@ -101,7 +101,7 @@ const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
-const GAME_VERSION = "v4.7";
+const GAME_VERSION = "v4.8";
 function init() {
     console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
@@ -407,6 +407,12 @@ function handleRemoteData(data) {
         
         checkOnlineStart();
         
+    } else if (data.type === 'SETUP_NOT_READY') {
+        // Karşı taraf hazır durumunu bozdu (Düzenlemeye döndü)
+        if (myPlayerId === 1) p2Chain = [];
+        else p1Chain = [];
+        showToast("Rakip kelimelerini düzenliyor...");
+
     } else if (data.type === 'GUESS') {
         guessInput.value = data.value;
         handleGuess(true); // true = remote
@@ -451,6 +457,11 @@ function startOnlineSetup() {
     setupInputsContainer.classList.remove('hidden');
     setupRandomBtn.classList.remove('hidden');
     setupActionBtn.disabled = false;
+    
+    // Buton durumunu sıfırla
+    setupActionBtn.innerText = "Hazır ve Gönder";
+    setupActionBtn.classList.remove('secondary-btn');
+    setupActionBtn.classList.add('primary-btn');
 
     if (myPlayerId === 1) {
         setupTitle.innerText = `${p1Name} Hazırlığı`;
@@ -550,6 +561,30 @@ function fillRandomSetup() {
 }
 
 function handleSetupAction() {
+    // ONLINE MOD: Düzenleme İsteği (Geri Dön)
+    if (gameMode === 'online' && setupActionBtn.innerText === "Düzenle") {
+        // Karşı tarafa hazır olmadığımızı bildir
+        conn.send({ type: 'SETUP_NOT_READY' });
+
+        // Kendi tarafımızda durumu geri al
+        if (myPlayerId === 1) p1Chain = [];
+        else p2Chain = [];
+
+        // UI'ı düzenleme moduna çevir
+        setupInputsContainer.classList.remove('hidden');
+        setupRandomBtn.classList.remove('hidden');
+        setupActionBtn.innerText = "Hazır ve Gönder";
+        setupActionBtn.classList.remove('secondary-btn');
+        setupActionBtn.classList.add('primary-btn');
+        
+        if (myPlayerId === 1) {
+            setupDesc.innerText = `${p2Name} için kelimeleri giriniz.`;
+        } else {
+            setupDesc.innerText = `${p1Name} için kelimeleri giriniz.`;
+        }
+        return;
+    }
+
     const inputs = document.querySelectorAll('.setup-input');
     let currentWords = [];
     let isValid = true;
@@ -574,11 +609,17 @@ function handleSetupAction() {
             conn.send({ type: 'SETUP_DONE', chain: p2Chain });
         }
         
-        // Bekleme Moduna Geç
+        // Bekleme Moduna Geç (Ama düzenlemeye izin ver)
         setupInputsContainer.classList.add('hidden');
         setupRandomBtn.classList.add('hidden');
-        setupActionBtn.disabled = true;
-        setupDesc.innerText = "Rakibin kelimeleri hazırlaması bekleniyor...";
+        
+        // Butonu "Düzenle" moduna çevir
+        setupActionBtn.disabled = false;
+        setupActionBtn.innerText = "Düzenle";
+        setupActionBtn.classList.remove('primary-btn');
+        setupActionBtn.classList.add('secondary-btn');
+        
+        setupDesc.innerText = "Rakibin kelimeleri hazırlaması bekleniyor... (Beklerken düzenleyebilirsiniz)";
         
         checkOnlineStart();
         return;
