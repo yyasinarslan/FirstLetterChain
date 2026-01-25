@@ -101,7 +101,7 @@ const TOTAL_WORDS = 7;
 
 // Bilgisayar Modu İçin Hazır Listeler
 // --- Başlangıç ---
-const GAME_VERSION = "v4.8";
+const GAME_VERSION = "v4.9";
 function init() {
     console.log(`Oyun başlatılıyor... Sürüm: ${GAME_VERSION}`);
 
@@ -712,6 +712,14 @@ function renderSingleChain(container, chain, currentProg, revealedCount, isActiv
                 itemDiv.classList.add('active');
                 // Sıra kimdeyse onun ipucu seviyesini kullan
                 showCount = revealedCounts[currentPlayer];
+
+                // UX İyileştirmesi: Kelimeye tıklayınca inputa odaklan
+                itemDiv.addEventListener('click', () => {
+                    guessInput.focus();
+                    // Inputun parlamasını sağla
+                    guessInput.classList.add('input-highlight');
+                    setTimeout(() => guessInput.classList.remove('input-highlight'), 500);
+                });
             }
             
             // Kelime uzunluğunu aşmaması için kontrol

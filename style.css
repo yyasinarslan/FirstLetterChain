@@ -212,6 +212,7 @@ input[type="text"]:focus {
     background-color: #eef2ff;
     border-left-color: var(--primary);
     border: 2px solid var(--primary); /* Highlight current */
+    cursor: pointer; /* Tıklanabilir olduğunu göster */
 }
 
 .word-index {
@@ -239,6 +240,12 @@ input[type="text"]:focus {
 }
 
 .shake { animation: shake 0.3s ease-in-out; }
+
+/* Input'a odaklanıldığını gösteren efekt */
+.input-highlight {
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.4);
+    border-color: var(--primary) !important;
+}
 
 /* Timer Styles */
 .timer-badge {
