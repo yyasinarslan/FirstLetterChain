@@ -11,5 +11,11 @@ const computerLists = [
     ["Yağmur", "Damlası", "Çikolata", "Şelalesi", "Suyu", "Şişesi"], // 6 items
     ["Uğur", "Böceği", "İlacı", "Kutusu", "Oyunu", "Konsolu"], // 6 items
     ["Yaz", "Tatili", "Köyü", "Kahvesi", "Fincanı", "Takımı", "Elbise"],
-    ["Şehir", "Merkezi", "Bankası", "Hesabı", "Makinesi", "Mühendisi", "Odası"]
+    ["Şehir", "Merkezi", "Bankası", "Hesabı", "Makinesi", "Mühendisi", "Odası"],
+    ["Patates", "Çuvalı", "İğnesi", "Deliği", "Çorap", "Kokusu", "Giderici"],
+    ["Cetvel", "Uzunluğu", "Boy", "Pos", "Cihazı", "Bilgisi", "Birikimi"],
+    ["Otobüs", "Şoförü", "Koltuğu", "Ayağı", "Mantarı", "Çorbası", "Kasesi"],
+    ["Netflix", "Dizisi", "Oyuncusu", "Değişimi", "Kartı", "Ödemesi", "Günü"],
+    ["Cilt", "Bakımı", "Kremi", "Rengi", "Körü", "Nokta"], // 6 items
+    ["Halay", "Başı", "Komutan", "Logar", "Kapağı", "Sesi"] // 6 items
 ];
